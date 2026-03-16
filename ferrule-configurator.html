@@ -632,8 +632,8 @@ function rebuildInitials() {
   if (!S.initials.trim() || !_capInfo) return;
 
   const text = S.initials.trim().toUpperCase().slice(0,3);
-  // Landscape canvas matching the panel aspect ratio
-  const W = 512, H = 192;
+  // Wide canvas — maps around the cylinder circumference
+  const W = 1024, H = 256;
   const cv  = document.createElement('canvas');
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
@@ -656,21 +656,22 @@ function rebuildInitials() {
   const tex = new THREE.CanvasTexture(cv);
   tex.encoding = THREE.sRGBEncoding;
 
-  // Panel on the SIDE of the smooth cap section, facing +Z (toward viewer)
-  // depthTest:false so it always renders on top of the surface
-  const totalH  = _capInfo.worldTopY - _capInfo.worldBottomY;
-  const planeW  = _capInfo.worldMaxR * 1.60;          // span most of smooth section width
-  const planeH  = totalH * 0.30;                      // 30% of ferrule height tall
-  const smoothY = _capInfo.worldBottomY + totalH * 0.73; // midpoint of smooth zone
-  const sideR   = _capInfo.worldMaxR * 1.02;          // just outside surface
+  // Open cylinder wrapping the smooth upper zone, well above the pyramid section
+  // rotation.y = PI so the UV seam faces away — text centered in canvas faces camera
+  const totalH    = _capInfo.worldTopY - _capInfo.worldBottomY;
+  const cylH      = totalH * 0.20;                        // band height in smooth zone
+  const cylCenterY = _capInfo.worldBottomY + totalH * 0.84; // 84% up = mid smooth zone
+  const cylR      = _capInfo.worldMaxR * 0.99;
 
-  const geo = new THREE.PlaneGeometry(planeW, planeH);
+  const geo = new THREE.CylinderGeometry(cylR, cylR, cylH, 64, 1, true);
   const mat = new THREE.MeshBasicMaterial({
     map: tex, transparent: true, depthWrite: false, depthTest: false,
+    side: THREE.FrontSide,
   });
 
   initialsDisk = new THREE.Mesh(geo, mat);
-  initialsDisk.position.set(0, smoothY, sideR);  // faces +Z, rotates with group
+  initialsDisk.rotation.y = Math.PI;    // seam faces back, text faces front
+  initialsDisk.position.y = cylCenterY;
   group.add(initialsDisk);
 }
 
