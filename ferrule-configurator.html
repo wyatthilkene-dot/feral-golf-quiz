@@ -3,786 +3,725 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Feral Golf — 3D Ferrule Configurator</title>
+  <title>Kyro Feral — 3D Configurator</title>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg:     #0f1a16;
-      --panel:  #1c302b;
-      --border: #2e5048;
-      --accent: #a1d9c6;
-      --gold:   #c8a84b;
-      --text:   #f1f3f3;
-      --muted:  #7aab9a;
-      --r:      10px;
-      --font:   'Rubik', system-ui, sans-serif;
+      --bg:    #0f1a16;
+      --panel: #1c302b;
+      --bdr:   #2e5048;
+      --acc:   #a1d9c6;
+      --gold:  #c8a84b;
+      --txt:   #f1f3f3;
+      --mut:   #7aab9a;
+      --r:     10px;
+      --font:  'Rubik', system-ui, sans-serif;
     }
+    body { font-family:var(--font); background:var(--bg); color:var(--txt); height:100vh; display:flex; overflow:hidden; }
 
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
-      display: flex;
-      overflow: hidden;
-    }
-
-    /* ── PANEL ─────────────────────────────── */
+    /* ── PANEL ── */
     #panel {
-      width: 288px;
-      min-width: 288px;
-      background: var(--panel);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
+      width:280px; min-width:280px;
+      background:var(--panel);
+      border-right:1px solid var(--bdr);
+      display:flex; flex-direction:column;
+      overflow-y:auto;
     }
-    #panel::-webkit-scrollbar { width: 3px; }
-    #panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    #panel::-webkit-scrollbar { width:3px; }
+    #panel::-webkit-scrollbar-thumb { background:var(--bdr); }
 
-    #panel-header {
-      padding: 22px 20px 16px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .eyebrow {
-      font-size: .62rem;
-      font-weight: 700;
-      letter-spacing: .15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 5px;
-    }
-    .panel-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      font-style: italic;
-    }
+    #ph { padding:22px 20px 16px; border-bottom:1px solid var(--bdr); flex-shrink:0; }
+    .ey { font-size:.6rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--acc); margin-bottom:4px; }
+    .pt { font-size:1.15rem; font-weight:700; font-style:italic; }
+    .ps { font-size:.72rem; color:var(--mut); margin-top:3px; }
 
-    .ps {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-    .ps-label {
-      font-size: .62rem;
-      font-weight: 700;
-      letter-spacing: .13em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 11px;
-    }
+    .sec { padding:16px 20px; border-bottom:1px solid var(--bdr); }
+    .sl  { font-size:.6rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--mut); margin-bottom:10px; }
 
-    /* Design buttons */
-    .design-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
-    .dbtn {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      border-radius: var(--r);
-      color: var(--text);
-      font-family: var(--font);
-      font-size: .72rem;
-      font-weight: 600;
-      padding: 9px 4px 8px;
-      cursor: pointer;
-      text-align: center;
-      transition: border-color .2s, background .2s, color .2s;
-      line-height: 1.3;
+    /* Shape */
+    .shape-row { display:flex; gap:8px; }
+    .sbtn {
+      flex:1; padding:12px 8px 10px;
+      background:transparent; border:1.5px solid var(--bdr); border-radius:var(--r);
+      color:var(--txt); font-family:var(--font); font-size:.8rem; font-weight:600;
+      cursor:pointer; text-align:center; transition:border-color .2s, background .2s, color .2s;
     }
-    .dbtn:hover { border-color: var(--accent); }
-    .dbtn.on { border-color: var(--accent); background: rgba(161,217,198,.1); color: var(--accent); }
-    .dbtn .di { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+    .sbtn:hover { border-color:var(--acc); }
+    .sbtn.on { border-color:var(--acc); background:rgba(161,217,198,.1); color:var(--acc); }
+    .sbtn .si { font-size:1.4rem; display:block; margin-bottom:4px; }
 
-    /* Swatches */
-    .swatch-row { display: flex; flex-wrap: wrap; gap: 7px; }
-    .sw {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: transform .15s, border-color .15s;
-      flex-shrink: 0;
+    /* Color pickers */
+    .cpick-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .cpick-label { font-size:.8rem; font-weight:600; color:var(--txt); flex:1; }
+    .cpick-wrap {
+      position:relative; width:48px; height:36px;
+      border-radius:8px; overflow:hidden; cursor:pointer;
+      border:2px solid var(--bdr); transition:border-color .2s;
+      flex-shrink:0;
     }
-    .sw:hover { transform: scale(1.18); }
-    .sw.on { border-color: var(--text); transform: scale(1.1); }
-    .sw.none-swatch {
-      background: repeating-linear-gradient(45deg,#2a3a35 0,#2a3a35 4px,#1c302b 4px,#1c302b 8px);
-      border-color: var(--border);
+    .cpick-wrap:hover { border-color:var(--acc); }
+    .cpick-wrap input[type="color"] {
+      position:absolute; inset:-8px; width:calc(100%+16px); height:calc(100%+16px);
+      opacity:0; cursor:pointer; border:none; padding:0;
     }
+    .cpick-swatch { position:absolute; inset:0; pointer-events:none; }
+
+    .preset-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+    .pw {
+      width:24px; height:24px; border-radius:50%; cursor:pointer;
+      border:2px solid transparent; transition:transform .15s, border-color .15s; flex-shrink:0;
+    }
+    .pw:hover { transform:scale(1.2); }
+    .pw.on { border-color:#fff; }
 
     /* Initials */
-    .init-row { display: flex; gap: 9px; }
-    .init-input {
-      width: 72px;
-      padding: 9px 8px;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: var(--font);
-      font-size: 1rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      text-align: center;
+    .init-row { display:flex; gap:9px; }
+    .ii {
+      width:64px; padding:9px 6px;
+      background:var(--bg); border:1.5px solid var(--bdr); border-radius:8px;
+      color:var(--txt); font-family:var(--font); font-size:1rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:.1em; text-align:center;
     }
-    .init-input:focus { outline: none; border-color: var(--accent); }
+    .ii:focus { outline:none; border-color:var(--acc); }
     select {
-      flex: 1;
-      padding: 9px 10px;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: var(--font);
-      font-size: .82rem;
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237aab9a'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      padding-right: 28px;
+      flex:1; padding:9px 28px 9px 10px;
+      background:var(--bg); border:1.5px solid var(--bdr); border-radius:8px;
+      color:var(--txt); font-family:var(--font); font-size:.8rem; cursor:pointer;
+      appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237aab9a'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 10px center;
     }
-    select:focus { outline: none; border-color: var(--accent); }
-
-    /* Drop zone */
-    #drop-zone {
-      border: 1.5px dashed var(--border);
-      border-radius: var(--r);
-      padding: 14px 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
-    }
-    #drop-zone:hover, #drop-zone.over { border-color: var(--accent); background: rgba(161,217,198,.05); }
-    #drop-zone p { font-size: .75rem; color: var(--muted); line-height: 1.55; }
-    #drop-zone span { color: var(--accent); font-weight: 600; }
-    #file-input { display: none; }
-
-    #model-name {
-      margin-top: 8px;
-      font-size: .72rem;
-      color: var(--muted);
-      text-align: center;
-      min-height: 16px;
-      word-break: break-all;
-    }
+    select:focus { outline:none; border-color:var(--acc); }
 
     /* Toggle */
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
-    .toggle-lbl { font-size: .8rem; color: var(--muted); }
+    .trow { display:flex; align-items:center; justify-content:space-between; }
+    .tlbl { font-size:.78rem; color:var(--mut); }
     .tog {
-      width: 38px; height: 20px;
-      background: var(--border);
-      border-radius: 10px;
-      cursor: pointer;
-      position: relative;
-      transition: background .2s;
-      flex-shrink: 0;
+      width:36px; height:20px; background:var(--bdr); border-radius:10px;
+      cursor:pointer; position:relative; transition:background .2s; flex-shrink:0;
     }
-    .tog.on { background: var(--accent); }
+    .tog.on { background:var(--acc); }
     .tog::after {
-      content: '';
-      position: absolute;
-      top: 3px; left: 3px;
-      width: 14px; height: 14px;
-      background: #fff;
-      border-radius: 50%;
-      transition: transform .2s;
+      content:''; position:absolute; top:3px; left:3px;
+      width:14px; height:14px; background:#fff; border-radius:50%;
+      transition:transform .2s;
     }
-    .tog.on::after { transform: translateX(18px); }
+    .tog.on::after { transform:translateX(16px); }
 
     /* Actions */
-    .action-row {
-      display: flex;
-      gap: 9px;
-      padding: 16px 20px;
-      flex-shrink: 0;
-      margin-top: auto;
-      border-top: 1px solid var(--border);
+    .ar {
+      display:flex; gap:8px; padding:15px 20px;
+      flex-shrink:0; margin-top:auto; border-top:1px solid var(--bdr);
     }
-    .btn-r {
-      flex: 1; padding: 11px;
-      background: transparent;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      font-family: var(--font); font-size: .82rem; font-weight: 600;
-      cursor: pointer;
-      transition: border-color .2s, color .2s;
+    .br {
+      flex:1; padding:11px; background:transparent;
+      border:1.5px solid var(--bdr); border-radius:8px;
+      color:var(--mut); font-family:var(--font); font-size:.8rem; font-weight:600;
+      cursor:pointer; transition:border-color .2s, color .2s;
     }
-    .btn-r:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-s {
-      flex: 1; padding: 11px;
-      background: var(--accent);
-      border: none;
-      border-radius: 8px;
-      color: #0d1f1a;
-      font-family: var(--font); font-size: .82rem; font-weight: 700;
-      cursor: pointer;
-      transition: opacity .15s;
+    .br:hover { border-color:var(--acc); color:var(--acc); }
+    .bs {
+      flex:1; padding:11px; background:var(--acc); border:none; border-radius:8px;
+      color:#0d1f1a; font-family:var(--font); font-size:.8rem; font-weight:700;
+      cursor:pointer; transition:opacity .15s;
     }
-    .btn-s:hover { opacity: .85; }
+    .bs:hover { opacity:.85; }
 
-    /* ── VIEWPORT ─────────────────────────── */
-    #vp {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      background: var(--bg);
-    }
-    #vp canvas { display: block; width: 100% !important; height: 100% !important; }
+    /* ── VIEWPORT ── */
+    #vp { flex:1; position:relative; overflow:hidden; }
+    #vp canvas { display:block; width:100%!important; height:100%!important; }
+
     #vp-hint {
-      position: absolute;
-      bottom: 18px; left: 50%;
-      transform: translateX(-50%);
-      font-size: .68rem;
-      color: rgba(161,217,198,.3);
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      pointer-events: none;
-      white-space: nowrap;
+      position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
+      font-size:.62rem; color:rgba(161,217,198,.28);
+      letter-spacing:.1em; text-transform:uppercase;
+      pointer-events:none; white-space:nowrap;
     }
     #vp-status {
-      position: absolute;
-      top: 14px; right: 14px;
-      font-size: .68rem;
-      color: var(--muted);
-      background: rgba(15,26,22,.75);
-      padding: 5px 11px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
+      position:absolute; top:14px; right:14px;
+      font-size:.65rem; color:var(--mut);
+      background:rgba(15,26,22,.8); padding:5px 12px;
+      border-radius:20px; border:1px solid var(--bdr);
     }
+    #vp-load {
+      position:absolute; inset:0;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      background:rgba(15,26,22,.9); pointer-events:none; transition:opacity .4s;
+    }
+    #vp-load span { font-size:.95rem; color:var(--acc); font-style:italic; font-weight:600; }
+    #vp-load small { font-size:.72rem; color:var(--mut); margin-top:6px; }
+
+    .spinner {
+      width:32px; height:32px; border:3px solid var(--bdr);
+      border-top-color:var(--acc); border-radius:50%;
+      animation:spin .8s linear infinite; margin-bottom:14px;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
   </style>
 </head>
 <body>
 
-<!-- ═══════════ PANEL ═══════════ -->
+<!-- ═══ PANEL ═══ -->
 <div id="panel">
 
-  <div id="panel-header">
-    <div class="eyebrow">Feral Golf Co.</div>
-    <div class="panel-title">3D Ferrule Configurator</div>
+  <div id="ph">
+    <div class="ey">Feral Golf Co.</div>
+    <div class="pt">Kyro Feral Configurator</div>
+    <div class="ps">Performance Ferrule — 3D Preview</div>
   </div>
 
-  <!-- Design -->
-  <div class="ps">
-    <div class="ps-label">Design</div>
-    <div class="design-grid">
-      <button class="dbtn on" data-d="classic"     onclick="setDesign('classic',this)">
-        <span class="di">⚙️</span>Classic
+  <!-- Shape -->
+  <div class="sec">
+    <div class="sl">Model Shape</div>
+    <div class="shape-row">
+      <button class="sbtn on" data-s="pyramid" onclick="setShape('pyramid',this)">
+        <span class="si">▲</span>Pyramid
       </button>
-      <button class="dbtn"    data-d="performance" onclick="setDesign('performance',this)">
-        <span class="di">⚡</span>Performance
-      </button>
-      <button class="dbtn"    data-d="ridged"      onclick="setDesign('ridged',this)">
-        <span class="di">💎</span>Ridged
+      <button class="sbtn" data-s="dimple" onclick="setShape('dimple',this)">
+        <span class="si">●</span>Dimple
       </button>
     </div>
   </div>
 
-  <!-- Primary color -->
-  <div class="ps">
-    <div class="ps-label">Primary Color</div>
-    <div class="swatch-row" id="pri-swatches"></div>
+  <!-- Surface color -->
+  <div class="sec">
+    <div class="sl">Surface Color <span style="font-weight:400;color:var(--mut);text-transform:none;letter-spacing:0">(grid base body)</span></div>
+    <div class="cpick-row">
+      <span class="cpick-label">Pick color</span>
+      <div class="cpick-wrap" id="surf-wrap">
+        <div class="cpick-swatch" id="surf-swatch" style="background:#f0f0f0"></div>
+        <input type="color" id="surf-picker" value="#f0f0f0" oninput="setSurface(this.value)">
+      </div>
+    </div>
+    <div class="preset-row" id="surf-presets"></div>
   </div>
 
-  <!-- Accent band -->
-  <div class="ps">
-    <div class="ps-label">Accent Band</div>
-    <div class="swatch-row" id="acc-swatches"></div>
+  <!-- Feature color -->
+  <div class="sec">
+    <div class="sl">Feature Color <span style="font-weight:400;color:var(--mut);text-transform:none;letter-spacing:0">(pyramids / dots)</span></div>
+    <div class="cpick-row">
+      <span class="cpick-label">Pick color</span>
+      <div class="cpick-wrap" id="feat-wrap">
+        <div class="cpick-swatch" id="feat-swatch" style="background:#1c1c1c"></div>
+        <input type="color" id="feat-picker" value="#1c1c1c" oninput="setFeature(this.value)">
+      </div>
+    </div>
+    <div class="preset-row" id="feat-presets"></div>
   </div>
 
   <!-- Initials -->
-  <div class="ps">
-    <div class="ps-label">Initials</div>
+  <div class="sec">
+    <div class="sl">Initials (optional)</div>
     <div class="init-row">
-      <input class="init-input" id="init-in" type="text" maxlength="3"
-             placeholder="—" oninput="queueInitials(this.value)">
-      <select id="font-sel" onchange="setFont(this.value)">
+      <input class="ii" id="ii" type="text" maxlength="3" placeholder="—" oninput="queueInit(this.value)">
+      <select id="fnt" onchange="setFont(this.value)">
         <option value="sans">Sans-Serif</option>
         <option value="serif">Serif</option>
-        <option value="script">Script (Italic)</option>
+        <option value="script">Script</option>
       </select>
     </div>
-  </div>
-
-  <!-- Load model -->
-  <div class="ps">
-    <div class="ps-label">Load Custom Model</div>
-    <div id="drop-zone" onclick="document.getElementById('file-input').click()">
-      <p>Drop a <span>.glb .obj .stl</span> file<br>or click to browse</p>
-    </div>
-    <input type="file" id="file-input" accept=".glb,.gltf,.obj,.stl"
-           onchange="loadFile(this.files[0])">
-    <div id="model-name"></div>
-    <div class="toggle-row">
-      <span class="toggle-lbl">Auto-rotate</span>
-      <div class="tog on" id="rot-tog" onclick="toggleRotate(this)"></div>
+    <div class="cpick-row" style="margin-top:10px">
+      <span class="cpick-label">Initials color</span>
+      <div class="cpick-wrap" id="ic-wrap">
+        <div class="cpick-swatch" id="ic-swatch" style="background:#c8a84b"></div>
+        <input type="color" id="ic-picker" value="#c8a84b" oninput="setInitColor(this.value)">
+      </div>
     </div>
   </div>
 
-  <div class="action-row">
-    <button class="btn-r" onclick="doReset()">↺ Reset</button>
-    <button class="btn-s" onclick="doSave()">📸 Save Design</button>
+  <!-- Controls -->
+  <div class="sec">
+    <div class="trow">
+      <span class="tlbl">Auto-rotate</span>
+      <div class="tog on" id="rtog" onclick="toggleRot(this)"></div>
+    </div>
+  </div>
+
+  <div class="ar">
+    <button class="br" onclick="doReset()">↺ Reset</button>
+    <button class="bs" onclick="doSave()">📸 Save</button>
   </div>
 </div>
 
-<!-- ═══════════ VIEWPORT ═══════════ -->
+<!-- ═══ VIEWPORT ═══ -->
 <div id="vp">
   <canvas id="c"></canvas>
-  <div id="vp-status">Parametric Model</div>
+  <div id="vp-status">Kyro Feral — Pyramid</div>
   <div id="vp-hint">Drag to rotate · Scroll to zoom</div>
+  <div id="vp-load">
+    <div class="spinner"></div>
+    <span>Loading model…</span>
+    <small id="vp-load-sub"></small>
+  </div>
 </div>
 
-<!-- Three.js r128 -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
 
 <script>
-// ══════════════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════
 
-const PRI = [
-  { name:'Matte Black',  hex:'#1c1c1c', r:0.75, m:0.1  },
-  { name:'Gloss White',  hex:'#eeeeee', r:0.08, m:0.05 },
-  { name:'Crimson',      hex:'#c0392b', r:0.55, m:0    },
-  { name:'Forest Green', hex:'#2d6a4f', r:0.6,  m:0    },
-  { name:'Ocean Blue',   hex:'#1e6091', r:0.55, m:0    },
-  { name:'Gold',         hex:'#c8a84b', r:0.25, m:0.8  },
-  { name:'Chrome',       hex:'#c8c8d8', r:0.05, m:1.0  },
-  { name:'Burnt Orange', hex:'#d35400', r:0.5,  m:0    },
-  { name:'Deep Purple',  hex:'#6c3483', r:0.55, m:0    },
-  { name:'Tactical',     hex:'#4a5e3a', r:0.8,  m:0    },
-];
-
-const ACC = [
-  { name:'None',   hex:null      },
-  { name:'Gold',   hex:'#c8a84b' },
-  { name:'Chrome', hex:'#c8c8d8' },
-  { name:'White',  hex:'#eeeeee' },
-  { name:'Black',  hex:'#1c1c1c' },
-  { name:'Red',    hex:'#c0392b' },
-];
-
-const FONTS = {
-  sans:   { css:'700 normal Arial, sans-serif'              },
-  serif:  { css:'700 normal Georgia, serif'                 },
-  script: { css:'400 italic "Palatino Linotype",Palatino,serif' },
+const MODELS = {
+  pyramid: './models/ferrule.obj',
+  dimple:  './models/ferrule-dotted.obj',
 };
 
-const DESIGNS = {
-  classic:     { topR:0.28, botR:0.40, h:1.4, ridges:0 },
-  performance: { topR:0.22, botR:0.42, h:1.2, ridges:0 },
-  ridged:      { topR:0.28, botR:0.40, h:1.4, ridges:8 },
+const PRESETS = [
+  '#f1f3f3','#1c1c1c','#c8a84b','#c0392b','#2d6a4f',
+  '#1e6091','#c8c8d8','#6c3483','#d35400','#a1d9c6',
+  '#4a5e3a','#e8e0c8','#8b4513','#2c3e50','#e91e8c',
+];
+
+const FONT_CSS = {
+  sans:   s=>`700 ${s}px Arial,sans-serif`,
+  serif:  s=>`700 ${s}px Georgia,serif`,
+  script: s=>`italic 400 ${s}px "Palatino Linotype",Palatino,serif`,
 };
 
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // STATE
-// ══════════════════════════════════════════════════════
-
+// ═══════════════════════════════════════════════════════
 const S = {
-  design:    'classic',
-  pri:       PRI[0],
-  acc:       ACC[1],
-  initials:  '',
-  font:      'sans',
-  autoRot:   true,
-  custom:    false,
+  shape:       'pyramid',
+  surface:     '#f0f0f0',   // flat grid base
+  feature:     '#1c1c1c',   // pyramids / dimple dots
+  initColor:   '#c8a84b',   // initials text color
+  initials:    '',
+  font:        'sans',
+  autoRot:     true,
 };
 
-// ══════════════════════════════════════════════════════
-// THREE.JS INIT
-// ══════════════════════════════════════════════════════
+const cache = {};
+let currentThreshold = 0.21; // updated per model
 
-const canvas  = document.getElementById('c');
-const vp      = document.getElementById('vp');
-
+// ═══════════════════════════════════════════════════════
+// THREE.JS SETUP
+// ═══════════════════════════════════════════════════════
+const canvas   = document.getElementById('c');
+const vpEl     = document.getElementById('vp');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, preserveDrawingBuffer:true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
-renderer.outputEncoding    = THREE.sRGBEncoding;
-renderer.toneMapping       = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.3;
+renderer.shadowMap.enabled   = true;
+renderer.outputEncoding      = THREE.sRGBEncoding;
+renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
 
 const scene  = new THREE.Scene();
 scene.background = new THREE.Color('#0f1a16');
-scene.fog        = new THREE.FogExp2('#0f1a16', 0.08);
 
-const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 100);
-camera.position.set(0, 0.5, 3.8);
+const camera = new THREE.PerspectiveCamera(38, 1, 0.01, 500);
+camera.position.set(0, 0, 6);
 
 const controls = new THREE.OrbitControls(camera, canvas);
-controls.enableDamping    = true;
-controls.dampingFactor    = 0.06;
-controls.minDistance      = 1.5;
-controls.maxDistance      = 9;
-controls.autoRotate       = true;
-controls.autoRotateSpeed  = 1.8;
-controls.target.set(0, 0, 0);
+controls.enableDamping   = true;
+controls.dampingFactor   = 0.06;
+controls.minDistance     = 2;
+controls.maxDistance     = 20;
+controls.autoRotate      = true;
+controls.autoRotateSpeed = 2.0;
 
-// ── Lights ──────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-
-const key = new THREE.DirectionalLight(0xffffff, 1.4);
-key.position.set(4, 6, 4);
-key.castShadow = true;
-key.shadow.mapSize.set(2048, 2048);
-key.shadow.camera.near = 0.1;
-key.shadow.camera.far  = 30;
-scene.add(key);
-
-const fill = new THREE.DirectionalLight(0xa1d9c6, 0.55);
-fill.position.set(-4, 2, -2);
-scene.add(fill);
-
-const rim = new THREE.DirectionalLight(0xffffff, 0.7);
-rim.position.set(0, -3, -5);
-scene.add(rim);
-
-const bot = new THREE.PointLight(0x2d6a4f, 0.4, 6);
-bot.position.set(0, -2, 1);
-scene.add(bot);
-
-// ── Ground ───────────────────────────────────────────
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(12, 12),
-  new THREE.MeshStandardMaterial({ color:0x091410, roughness:0.95, metalness:0 })
+// Ground
+const gnd = new THREE.Mesh(
+  new THREE.PlaneGeometry(30,30),
+  new THREE.MeshStandardMaterial({ color:0x080f0c, roughness:0.95 })
 );
-ground.rotation.x = -Math.PI / 2;
-ground.position.y = -1.0;
-ground.receiveShadow = true;
-scene.add(ground);
+gnd.rotation.x=-Math.PI/2; gnd.position.y=-2.2; gnd.receiveShadow=true;
+scene.add(gnd);
 
-// ── Group ────────────────────────────────────────────
+// ── Standard lights (for fallback)
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+const kl = new THREE.DirectionalLight(0xffffff, 1.2);
+kl.position.set(4,6,4); kl.castShadow=true; scene.add(kl);
+const fl = new THREE.DirectionalLight(0xa1d9c6, 0.45);
+fl.position.set(-4,2,-2); scene.add(fl);
+const rl = new THREE.DirectionalLight(0xffffff, 0.6);
+rl.position.set(0,-3,-5); scene.add(rl);
+
 const group = new THREE.Group();
 scene.add(group);
 
-// ══════════════════════════════════════════════════════
-// GEOMETRY BUILDERS
-// ══════════════════════════════════════════════════════
-
-function makeFerruleGeo(d) {
-  const pts = [];
-  pts.push(new THREE.Vector2(0, 0));                // bottom cap center
-  pts.push(new THREE.Vector2(d.botR * 0.6, 0.01)); // inner bottom edge
-  pts.push(new THREE.Vector2(d.botR, 0.05));        // outer bottom
-
-  const steps = d.ridges > 0 ? 60 : 20;
-  for (let i = 0; i <= steps; i++) {
-    const t  = i / steps;
-    const br = d.botR + (d.topR - d.botR) * t;
-    // Slight outward bulge at midpoint for realism
-    const bulge = 0.012 * Math.sin(t * Math.PI);
-    const r = br + bulge;
-    const ridge = (d.ridges > 0 && t > 0.08 && t < 0.92)
-      ? 0.02 * Math.sin(t * Math.PI * d.ridges)
-      : 0;
-    pts.push(new THREE.Vector2(r + ridge, 0.05 + t * (d.h - 0.1)));
+// ═══════════════════════════════════════════════════════
+// SHADER
+// Surface color  = flat base grid between features
+// Feature color  = individual pyramids / dimple dots
+// Classification:
+//   bore faces   (r < uBoreR)          → surface color
+//   end cap      (|N.y| > 0.75)        → surface color
+//   flat radial  (N·radial >= uFeatTh) → surface color
+//   angled face  (N·radial <  uFeatTh) → feature color
+// ═══════════════════════════════════════════════════════
+const VERT = `
+  varying vec3 vNormal;
+  varying vec3 vWorldPos;
+  varying vec3 vViewPos;
+  void main() {
+    vec4 wp   = modelMatrix * vec4(position, 1.0);
+    vWorldPos = wp.xyz;
+    vNormal   = normalize(normalMatrix * normal);
+    vec4 mvp  = modelViewMatrix * vec4(position, 1.0);
+    vViewPos  = -mvp.xyz;
+    gl_Position = projectionMatrix * mvp;
   }
+`;
 
-  pts.push(new THREE.Vector2(d.topR, d.h - 0.04));  // outer top
-  pts.push(new THREE.Vector2(d.topR * 0.5, d.h - 0.01)); // inner top edge
-  pts.push(new THREE.Vector2(0, d.h));               // top cap center
+const FRAG = `
+  uniform vec3  uSurface;    // flat body / grid base color
+  uniform vec3  uFeature;    // pyramid or dimple dot color
+  uniform float uBoreR;      // bore radius (world space)
+  uniform float uFeatTh;     // N·radial threshold for feature detection
+  varying vec3  vNormal;
+  varying vec3  vWorldPos;
+  varying vec3  vViewPos;
 
-  return new THREE.LatheGeometry(pts, 64);
-}
+  void main() {
+    vec3  N    = normalize(vNormal);
+    float r    = length(vec2(vWorldPos.x, vWorldPos.z));
+    vec3  rad  = r > 0.001
+                 ? vec3(vWorldPos.x/r, 0.0, vWorldPos.z/r)
+                 : vec3(1.0, 0.0, 0.0);
 
-// ══════════════════════════════════════════════════════
-// MATERIAL / TEXTURE
-// ══════════════════════════════════════════════════════
+    float radDot  = dot(N, rad);   // +1 = flat outward, -1 = flat inward
+    float vertAbs = abs(N.y);      // 1 = end cap
 
-function makeMat(priDef, initials, fontKey) {
-  const mat = new THREE.MeshStandardMaterial({
-    color:     new THREE.Color(priDef.hex),
-    roughness: priDef.r,
-    metalness: priDef.m,
+    bool isBore    = r < uBoreR;
+    bool isEndCap  = vertAbs > 0.75;
+    bool isFeature = !isBore && !isEndCap && radDot < uFeatTh;
+
+    vec3 base = isFeature ? uFeature : uSurface;
+
+    // Blinn-Phong
+    vec3 V  = normalize(vViewPos);
+    vec3 L1 = normalize(vec3(3.0, 5.0, 3.0));
+    float d1 = max(dot(N, L1), 0.0);
+    vec3  H1 = normalize(L1 + V);
+    float s1 = pow(max(dot(N, H1), 0.0), 64.0);
+    vec3 L2  = normalize(vec3(-3.0, 2.0, -2.0));
+    float d2 = max(dot(N, L2), 0.0);
+    vec3 L3  = normalize(vec3(0.0, -2.0, -4.0));
+    float d3 = max(dot(N, L3), 0.0);
+
+    vec3 col = 0.20 * base
+             + 0.68 * d1 * base
+             + 0.45 * s1 * vec3(1.0)
+             + 0.18 * d2 * base
+             + 0.14 * d3 * vec3(1.0);
+
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+// Per-model feature threshold (tuned from normal distribution analysis)
+const MODEL_FEAT_TH = { pyramid: 0.92, dimple: 0.97 };
+
+function makeMat(boreR, featTh) {
+  return new THREE.ShaderMaterial({
+    vertexShader:   VERT,
+    fragmentShader: FRAG,
+    uniforms: {
+      uSurface: { value: new THREE.Color(S.surface)  },
+      uFeature: { value: new THREE.Color(S.feature)  },
+      uBoreR:   { value: boreR  },
+      uFeatTh:  { value: featTh },
+    },
+    side: THREE.DoubleSide,
   });
-  if (initials && initials.trim()) {
-    mat.map = makeInitialsTex(initials.trim().toUpperCase().slice(0,3), fontKey, priDef.hex);
-    mat.needsUpdate = true;
-  }
-  return mat;
 }
 
-function makeInitialsTex(text, fontKey, bgHex) {
-  const W = 1024, H = 512;
-  const cv = document.createElement('canvas');
+// Find bore/body gap threshold from vertex radial distribution
+function computeBoreR(obj, rawCX, rawCZ) {
+  const radii = [];
+  obj.traverse(c => {
+    if (!c.isMesh) return;
+    const pos = c.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const dx = pos.getX(i) - rawCX;
+      const dz = pos.getZ(i) - rawCZ;
+      radii.push(Math.sqrt(dx*dx + dz*dz));
+    }
+  });
+  radii.sort((a,b) => a-b);
+  let maxGap = 0, gapMid = radii[0];
+  for (let i = 0; i < radii.length-1; i++) {
+    const gap = radii[i+1]-radii[i];
+    if (gap > maxGap) { maxGap = gap; gapMid = (radii[i]+radii[i+1])/2; }
+  }
+  return gapMid;
+}
+
+// ═══════════════════════════════════════════════════════
+// MODEL LOADING
+// ═══════════════════════════════════════════════════════
+
+function clearGroup() {
+  while (group.children.length) {
+    const c = group.children[0];
+    c.geometry?.dispose();
+    c.material?.dispose();
+    group.remove(c);
+  }
+}
+
+function setLoading(on, sub) {
+  const el = document.getElementById('vp-load');
+  el.style.opacity = on ? '1' : '0';
+  el.style.pointerEvents = on ? 'all' : 'none';
+  if (sub) document.getElementById('vp-load-sub').textContent = sub;
+}
+
+function applyObj(obj) {
+  const rawBox    = new THREE.Box3().setFromObject(obj);
+  const rawSize   = new THREE.Vector3();
+  rawBox.getSize(rawSize);
+  const rawCenter = new THREE.Vector3();
+  rawBox.getCenter(rawCenter);
+
+  const rawBoreR  = computeBoreR(obj, rawCenter.x, rawCenter.z);
+  const maxDim    = Math.max(rawSize.x, rawSize.y, rawSize.z);
+  const scale     = 2.0 / maxDim;
+  const worldBoreR = rawBoreR * scale;
+  const featTh    = MODEL_FEAT_TH[S.shape] ?? 0.95;
+
+  obj.scale.setScalar(scale);
+  const scaledCenter = rawCenter.clone().multiplyScalar(scale);
+  obj.position.sub(scaledCenter);
+
+  obj.traverse(c => {
+    if (!c.isMesh) return;
+    if (!c.geometry.attributes.normal) c.geometry.computeVertexNormals();
+    c.material      = makeMat(worldBoreR, featTh);
+    c.castShadow    = true;
+    c.receiveShadow = true;
+  });
+
+  clearGroup();
+  group.add(obj);
+
+  // Store for incremental initials rebuilds
+  _lastRawSize = rawSize; _lastScale = scale; _lastScaledCenter = scaledCenter;
+
+  rebuildInitials(rawSize, scale, scaledCenter);
+  setLoading(false);
+}
+
+function loadShape(shape) {
+  setLoading(true, MODELS[shape].split('/').pop());
+  document.getElementById('vp-status').textContent = `Kyro Feral — ${shape === 'pyramid' ? 'Pyramid' : 'Dimple'}`;
+
+  if (cache[shape]) {
+    applyObj(cache[shape].clone());
+    return;
+  }
+
+  new THREE.OBJLoader().load(
+    MODELS[shape],
+    obj => { cache[shape] = obj.clone(); applyObj(obj); },
+    xhr => {
+      if (xhr.total) {
+        const pct = Math.round(xhr.loaded/xhr.total*100);
+        document.getElementById('vp-load-sub').textContent = `${pct}%`;
+      }
+    },
+    err => {
+      console.error(err);
+      setLoading(false);
+      applyFallback();
+      document.getElementById('vp-status').textContent = 'Fallback shape — serve via HTTP server';
+    }
+  );
+}
+
+function applyFallback() {
+  clearGroup();
+  // Tapered cylinder as fallback
+  const pts = [];
+  pts.push(new THREE.Vector2(0,0));
+  pts.push(new THREE.Vector2(0.45,0.04));
+  for (let i=0;i<=20;i++) {
+    const t=i/20, r=0.45+(0.30-0.45)*t+0.015*Math.sin(t*Math.PI);
+    pts.push(new THREE.Vector2(r, 0.04+t*1.9));
+  }
+  pts.push(new THREE.Vector2(0.30,1.97));
+  pts.push(new THREE.Vector2(0,2.0));
+  const geo  = new THREE.LatheGeometry(pts,64);
+  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+    color:new THREE.Color(S.surface), roughness:0.5, metalness:0.1, side:THREE.DoubleSide
+  }));
+  mesh.castShadow=true;
+  mesh.position.y=-1.0;
+  group.add(mesh);
+}
+
+// ═══════════════════════════════════════════════════════
+// UPDATE COLORS — uniform updates only, no reload
+// ═══════════════════════════════════════════════════════
+function updateColors() {
+  group.traverse(c => {
+    if (!c.isMesh || !c.material?.uniforms) return;
+    c.material.uniforms.uSurface.value.set(S.surface);
+    c.material.uniforms.uFeature.value.set(S.feature);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// INITIALS SPRITE — placed on the smooth end cap
+// ═══════════════════════════════════════════════════════
+let initialsSprite = null;
+
+function rebuildInitials(rawSize, scale, scaledCenter) {
+  // Remove existing sprite
+  if (initialsSprite) { group.remove(initialsSprite); initialsSprite = null; }
+  if (!S.initials.trim()) return;
+
+  const text    = S.initials.trim().toUpperCase().slice(0,3);
+  const W = 256, H = 256;
+  const cv  = document.createElement('canvas');
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
 
-  ctx.fillStyle = bgHex;
-  ctx.fillRect(0, 0, W, H);
-
-  const fd   = FONTS[fontKey] || FONTS.sans;
-  const size = Math.min(220, H * 0.52);
-  ctx.font    = `${fd.css.replace('700','700').replace('400','400')} ${size}px ${fd.css.split(' ').slice(2).join(' ')}`;
-
-  // Parse font string properly
-  const parts = fontKey === 'script'
-    ? `italic 400 ${size}px "Palatino Linotype",Palatino,serif`
-    : fontKey === 'serif'
-      ? `normal 700 ${size}px Georgia,serif`
-      : `normal 700 ${size}px Arial,sans-serif`;
-  ctx.font = parts;
-
-  ctx.textAlign    = 'center';
+  ctx.clearRect(0,0,W,H);
+  const sz = 110;
+  ctx.font = FONT_CSS[S.font](sz);
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-
-  // Shadow
-  ctx.shadowColor   = 'rgba(0,0,0,0.5)';
-  ctx.shadowBlur    = 10;
-  ctx.shadowOffsetX = 3;
-  ctx.shadowOffsetY = 4;
-
-  // Contrast color
-  const hex = bgHex.replace('#','');
-  const lum = (0.299*parseInt(hex.slice(0,2),16) +
-               0.587*parseInt(hex.slice(2,4),16) +
-               0.114*parseInt(hex.slice(4,6),16)) / 255;
-  ctx.fillStyle = lum > 0.45 ? 'rgba(20,20,20,0.9)' : 'rgba(240,240,240,0.95)';
+  ctx.shadowColor = 'rgba(0,0,0,0.55)';
+  ctx.shadowBlur = 6;
+  ctx.fillStyle = S.initColor;
   ctx.fillText(text, W/2, H/2);
 
   const tex = new THREE.CanvasTexture(cv);
   tex.encoding = THREE.sRGBEncoding;
-  return tex;
+
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+  initialsSprite = new THREE.Sprite(mat);
+
+  // Position on the smooth top cap of the ferrule
+  // Raw top Y ≈ rawSize.y, scaled = rawSize.y * scale, offset by scaledCenter.y
+  const topY = (rawSize.y * scale) - scaledCenter.y - 0.05;
+  initialsSprite.position.set(0, topY * 0.72, 0);
+  initialsSprite.scale.set(0.55, 0.55, 0.55);
+
+  group.add(initialsSprite);
 }
 
-function makeAccentBand(design, hex) {
-  if (!hex) return null;
-  const d = DESIGNS[design];
-  const geo = new THREE.TorusGeometry(d.botR + 0.008, 0.022, 16, 80);
-  const mat = new THREE.MeshStandardMaterial({
-    color:     new THREE.Color(hex),
-    roughness: hex === '#c8c8d8' ? 0.05 : 0.2,
-    metalness: (hex === '#c8c8d8' || hex === '#c8a84b') ? 0.9 : 0.4,
-  });
-  const band = new THREE.Mesh(geo, mat);
-  band.rotation.x = Math.PI / 2;
-  band.castShadow = true;
-  return band;
-}
-
-// ══════════════════════════════════════════════════════
-// REBUILD
-// ══════════════════════════════════════════════════════
-
-function rebuild() {
-  // Dispose all children
-  while (group.children.length) {
-    const c = group.children[0];
-    if (c.geometry) c.geometry.dispose();
-    if (c.material) {
-      c.material.map?.dispose();
-      c.material.dispose();
-    }
-    group.remove(c);
-  }
-  if (S.custom) return;
-
-  const d   = DESIGNS[S.design];
-  const geo = makeFerruleGeo(d);
-  const mat = makeMat(S.pri, S.initials, S.font);
-
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.castShadow    = true;
-  mesh.receiveShadow = true;
-  mesh.position.y    = -d.h / 2;
-  group.add(mesh);
-
-  // Accent band near base
-  const band = makeAccentBand(S.design, S.acc.hex);
-  if (band) {
-    band.position.y = -d.h / 2 + 0.1;
-    group.add(band);
-  }
-}
-
-// ══════════════════════════════════════════════════════
-// UI INIT
-// ══════════════════════════════════════════════════════
-
-function buildSwatches() {
-  const pg = document.getElementById('pri-swatches');
-  PRI.forEach((c, i) => {
-    const el = document.createElement('div');
-    el.className = 'sw' + (i===0?' on':'');
-    el.style.background = c.hex;
-    el.title = c.name;
-    el.onclick = () => {
-      pg.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));
-      el.classList.add('on');
-      S.pri = c;
-      rebuild();
-    };
-    pg.appendChild(el);
-  });
-
-  const ag = document.getElementById('acc-swatches');
-  ACC.forEach((c, i) => {
-    const el = document.createElement('div');
-    el.className = 'sw' + (i===1?' on':'') + (c.hex?'':' none-swatch');
-    if (c.hex) el.style.background = c.hex;
-    el.title = c.name;
-    el.onclick = () => {
-      ag.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));
-      el.classList.add('on');
-      S.acc = c;
-      rebuild();
-    };
-    ag.appendChild(el);
+// ═══════════════════════════════════════════════════════
+// UI BUILDERS
+// ═══════════════════════════════════════════════════════
+function buildPresets() {
+  [['surf-presets', true], ['feat-presets', false]].forEach(([id, isSurf]) => {
+    const row = document.getElementById(id);
+    PRESETS.forEach((hex, i) => {
+      const el = document.createElement('div');
+      el.className = 'pw' + ((isSurf && i===0)||(!isSurf && i===1)?' on':'');
+      el.style.background = hex;
+      el.onclick = () => {
+        row.querySelectorAll('.pw').forEach(p=>p.classList.remove('on'));
+        el.classList.add('on');
+        if (isSurf) setSurface(hex); else setFeature(hex);
+      };
+      row.appendChild(el);
+    });
   });
 }
 
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // EVENT HANDLERS
-// ══════════════════════════════════════════════════════
-
-function setDesign(d, btn) {
-  document.querySelectorAll('.dbtn').forEach(b=>b.classList.remove('on'));
+// ═══════════════════════════════════════════════════════
+function setShape(s, btn) {
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  S.design = d;
-  S.custom = false;
-  document.getElementById('vp-status').textContent = 'Parametric Model';
-  rebuild();
+  S.shape = s;
+  loadShape(s);
 }
 
-let _itimer;
-function queueInitials(v) {
-  clearTimeout(_itimer);
-  _itimer = setTimeout(()=>{ S.initials=v; rebuild(); }, 350);
+function setSurface(hex) {
+  S.surface = hex;
+  document.getElementById('surf-swatch').style.background = hex;
+  document.getElementById('surf-picker').value = hex;
+  updateColors();
 }
 
-function setFont(v) { S.font=v; rebuild(); }
+function setFeature(hex) {
+  S.feature = hex;
+  document.getElementById('feat-swatch').style.background = hex;
+  document.getElementById('feat-picker').value = hex;
+  updateColors();
+}
 
-function toggleRotate(el) {
+function setInitColor(hex) {
+  S.initColor = hex;
+  document.getElementById('ic-swatch').style.background = hex;
+  document.getElementById('ic-picker').value = hex;
+  if (S.initials.trim()) rebuildInitials({ y: 2 / (2/50) }, 2/50.35, { y: 25.04*(2/50.35) });
+  // Re-trigger by forcing a mini-rebuild via the stored last obj dimensions
+  _lastRawSize && rebuildInitials(_lastRawSize, _lastScale, _lastScaledCenter);
+}
+
+let _lastRawSize, _lastScale, _lastScaledCenter;
+let _it;
+function queueInit(v) {
+  clearTimeout(_it);
+  _it = setTimeout(()=>{
+    S.initials = v;
+    _lastRawSize && rebuildInitials(_lastRawSize, _lastScale, _lastScaledCenter);
+  }, 350);
+}
+function setFont(v) {
+  S.font = v;
+  _lastRawSize && rebuildInitials(_lastRawSize, _lastScale, _lastScaledCenter);
+}
+
+function toggleRot(el) {
   el.classList.toggle('on');
-  S.autoRot = el.classList.contains('on');
-  controls.autoRotate = S.autoRot;
+  S.autoRot=el.classList.contains('on');
+  controls.autoRotate=S.autoRot;
 }
 
 function doReset() {
-  S.design='classic'; S.pri=PRI[0]; S.acc=ACC[1];
-  S.initials=''; S.font='sans'; S.autoRot=true; S.custom=false;
-
-  document.querySelectorAll('.dbtn').forEach(b=>b.classList.toggle('on', b.dataset.d==='classic'));
-  document.querySelectorAll('#pri-swatches .sw').forEach((s,i)=>s.classList.toggle('on',i===0));
-  document.querySelectorAll('#acc-swatches .sw').forEach((s,i)=>s.classList.toggle('on',i===1));
-  document.getElementById('init-in').value='';
-  document.getElementById('font-sel').value='sans';
-  document.getElementById('rot-tog').classList.add('on');
-  document.getElementById('vp-status').textContent='Parametric Model';
-  document.getElementById('model-name').textContent='';
+  S.surface='#f0f0f0'; S.feature='#1c1c1c'; S.initColor='#c8a84b';
+  S.initials=''; S.font='sans'; S.autoRot=true;
+  setSurface('#f0f0f0'); setFeature('#1c1c1c');
+  document.getElementById('ic-swatch').style.background='#c8a84b';
+  document.getElementById('ic-picker').value='#c8a84b';
+  document.getElementById('ii').value='';
+  document.getElementById('fnt').value='sans';
+  document.getElementById('rtog').classList.add('on');
   controls.autoRotate=true;
-  rebuild();
+  document.querySelectorAll('.sbtn').forEach((b,i)=>b.classList.toggle('on',i===0));
+  S.shape='pyramid';
+  loadShape('pyramid');
 }
 
 function doSave() {
-  renderer.render(scene, camera);
-  const a = document.createElement('a');
-  a.href     = renderer.domElement.toDataURL('image/png');
-  a.download = `feral-ferrule-${S.design}-${Date.now()}.png`;
+  renderer.render(scene,camera);
+  const a=document.createElement('a');
+  a.href=renderer.domElement.toDataURL('image/png');
+  a.download=`kyro-feral-${S.shape}-${Date.now()}.png`;
   a.click();
 }
 
-// ── Drop zone ──────────────────────────────────────────
-const dz = document.getElementById('drop-zone');
-dz.addEventListener('dragover',  e=>{ e.preventDefault(); dz.classList.add('over'); });
-dz.addEventListener('dragleave', ()=>dz.classList.remove('over'));
-dz.addEventListener('drop', e=>{
-  e.preventDefault(); dz.classList.remove('over');
-  const f = e.dataTransfer.files[0];
-  if (f) loadFile(f);
-});
-
-function loadFile(file) {
-  if (!file) return;
-  const ext = file.name.split('.').pop().toLowerCase();
-  const url  = URL.createObjectURL(file);
-  document.getElementById('vp-status').textContent = 'Loading…';
-  document.getElementById('model-name').textContent = '';
-
-  if (ext==='glb'||ext==='gltf') {
-    new THREE.GLTFLoader().load(url, g=>applyModel(g.scene, file.name), null, modelErr);
-  } else if (ext==='obj') {
-    new THREE.OBJLoader().load(url, o=>applyModel(o, file.name), null, modelErr);
-  } else if (ext==='stl') {
-    new THREE.STLLoader().load(url, geo=>{
-      applyModel(new THREE.Mesh(geo, makeMat(S.pri, S.initials, S.font)), file.name);
-    }, null, modelErr);
-  } else {
-    alert('Unsupported format — use .glb, .obj, or .stl');
-  }
-}
-
-function applyModel(obj, name) {
-  while (group.children.length) {
-    const c=group.children[0]; c.geometry?.dispose(); c.material?.dispose(); group.remove(c);
-  }
-  // Normalize
-  const box  = new THREE.Box3().setFromObject(obj);
-  const size = new THREE.Vector3();
-  box.getSize(size);
-  const scale = 1.6 / Math.max(size.x, size.y, size.z);
-  obj.scale.setScalar(scale);
-  const center = new THREE.Vector3();
-  box.setFromObject(obj).getCenter(center);
-  obj.position.sub(center);
-
-  obj.traverse(c => {
-    if (!c.isMesh) return;
-    c.material     = makeMat(S.pri, S.initials, S.font);
-    c.castShadow   = true;
-    c.receiveShadow = true;
-  });
-
-  group.add(obj);
-  S.custom = true;
-  document.getElementById('vp-status').textContent = 'Custom Model';
-  document.getElementById('model-name').textContent = name;
-}
-
-function modelErr(err) {
-  console.error(err);
-  document.getElementById('vp-status').textContent = 'Load failed';
-  S.custom = false;
-  rebuild();
-}
-
-// ══════════════════════════════════════════════════════
-// RESIZE
-// ══════════════════════════════════════════════════════
-
+// ═══════════════════════════════════════════════════════
+// RESIZE + LOOP
+// ═══════════════════════════════════════════════════════
 function onResize() {
-  const w = vp.clientWidth, h = vp.clientHeight;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
+  const w=vpEl.clientWidth, h=vpEl.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect=w/h;
   camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', onResize);
 onResize();
 
-// ══════════════════════════════════════════════════════
-// LOOP
-// ══════════════════════════════════════════════════════
+(function loop(){requestAnimationFrame(loop); controls.update(); renderer.render(scene,camera);})();
 
-(function animate() {
-  requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene, camera);
-})();
-
-// ══════════════════════════════════════════════════════
-// GO
-// ══════════════════════════════════════════════════════
-buildSwatches();
-rebuild();
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+buildPresets();
+loadShape('pyramid');
 </script>
 </body>
 </html>
