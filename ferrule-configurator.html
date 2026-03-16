@@ -656,20 +656,16 @@ function rebuildInitials() {
   const tex = new THREE.CanvasTexture(cv);
   tex.encoding = THREE.sRGBEncoding;
 
-  // Wide plane spanning the smooth upper section surface
-  const totalH  = _capInfo.worldTopY - _capInfo.worldBottomY;
-  const planeW  = _capInfo.worldMaxR * 1.70;   // nearly full diameter wide
-  const planeH  = totalH * 0.28;                // ~28% of ferrule height tall
-  const smoothY = _capInfo.worldBottomY + totalH * 0.72; // midpoint of smooth zone
-  const sideR   = _capInfo.worldMaxR * 1.005;   // flush on outer surface
-
-  const geo = new THREE.PlaneGeometry(planeW, planeH);
-  const mat = new THREE.MeshBasicMaterial({
+  // Flat disk on the TOP CAP face, lying flat and facing up
+  const diskR = _capInfo.worldMaxR * 0.80;
+  const geo   = new THREE.CircleGeometry(diskR, 64);
+  const mat   = new THREE.MeshBasicMaterial({
     map: tex, transparent: true, depthWrite: false, depthTest: true,
   });
 
   initialsDisk = new THREE.Mesh(geo, mat);
-  initialsDisk.position.set(0, smoothY, sideR);  // faces +Z, rotates with group
+  initialsDisk.rotation.x = -Math.PI / 2;             // flat, facing up
+  initialsDisk.position.y  = _capInfo.worldTopY + 0.002; // sit on top cap surface
   group.add(initialsDisk);
 }
 
