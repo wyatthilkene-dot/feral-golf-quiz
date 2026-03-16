@@ -632,35 +632,41 @@ function rebuildInitials() {
   if (!S.initials.trim() || !_capInfo) return;
 
   const text = S.initials.trim().toUpperCase().slice(0,3);
-  const W = 512, H = 512;
+  // Wide landscape canvas — spans the smooth section side
+  const W = 768, H = 256;
   const cv  = document.createElement('canvas');
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
   ctx.clearRect(0, 0, W, H);
 
-  const sz = 180;
-  ctx.font = FONT_CSS[S.font](sz);
+  // Fill text to use most of the canvas width
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'rgba(0,0,0,0.5)';
-  ctx.shadowBlur  = 10;
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur  = 12;
   ctx.fillStyle   = S.initColor;
+  // Scale font size to fill canvas width
+  let sz = 180;
+  ctx.font = FONT_CSS[S.font](sz);
+  const measured = ctx.measureText(text).width;
+  if (measured > 0) sz = Math.min(sz, sz * (W * 0.85) / measured);
+  ctx.font = FONT_CSS[S.font](Math.floor(sz));
   ctx.fillText(text, W/2, H/2);
 
   const tex = new THREE.CanvasTexture(cv);
   tex.encoding = THREE.sRGBEncoding;
 
-  // Medallion on the SIDE of the smooth upper section
-  // CircleGeometry lies in XY plane, faces +Z by default — perfect for side placement
-  const diskR = _capInfo.worldMaxR * 0.38;
-  const geo   = new THREE.CircleGeometry(diskR, 64);
-  const mat   = new THREE.MeshBasicMaterial({
+  // Wide plane spanning the smooth upper section surface
+  const totalH  = _capInfo.worldTopY - _capInfo.worldBottomY;
+  const planeW  = _capInfo.worldMaxR * 1.70;   // nearly full diameter wide
+  const planeH  = totalH * 0.28;                // ~28% of ferrule height tall
+  const smoothY = _capInfo.worldBottomY + totalH * 0.72; // midpoint of smooth zone
+  const sideR   = _capInfo.worldMaxR * 1.005;   // flush on outer surface
+
+  const geo = new THREE.PlaneGeometry(planeW, planeH);
+  const mat = new THREE.MeshBasicMaterial({
     map: tex, transparent: true, depthWrite: false, depthTest: true,
   });
-
-  // Position at ~70% up the ferrule height (midpoint of smooth zone), on the outer surface
-  const smoothY = _capInfo.worldBottomY + (_capInfo.worldTopY - _capInfo.worldBottomY) * 0.70;
-  const sideR   = _capInfo.worldMaxR * 1.01;  // just proud of the surface
 
   initialsDisk = new THREE.Mesh(geo, mat);
   initialsDisk.position.set(0, smoothY, sideR);  // faces +Z, rotates with group
