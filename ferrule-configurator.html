@@ -650,16 +650,20 @@ function rebuildInitials() {
   const tex = new THREE.CanvasTexture(cv);
   tex.encoding = THREE.sRGBEncoding;
 
-  // Disk radius = 80% of outer radius so it fits within the smooth cap
-  const diskR = _capInfo.worldMaxR * 0.80;
+  // Medallion on the SIDE of the smooth upper section
+  // CircleGeometry lies in XY plane, faces +Z by default — perfect for side placement
+  const diskR = _capInfo.worldMaxR * 0.38;
   const geo   = new THREE.CircleGeometry(diskR, 64);
   const mat   = new THREE.MeshBasicMaterial({
     map: tex, transparent: true, depthWrite: false, depthTest: true,
   });
 
+  // Position at ~70% up the ferrule height (midpoint of smooth zone), on the outer surface
+  const smoothY = _capInfo.worldBottomY + (_capInfo.worldTopY - _capInfo.worldBottomY) * 0.70;
+  const sideR   = _capInfo.worldMaxR * 1.01;  // just proud of the surface
+
   initialsDisk = new THREE.Mesh(geo, mat);
-  initialsDisk.rotation.x = Math.PI / 2;               // lay flat, facing down (hosel end)
-  initialsDisk.position.y = _capInfo.worldBottomY - 0.002; // sit on bottom (hosel) cap
+  initialsDisk.position.set(0, smoothY, sideR);  // faces +Z, rotates with group
   group.add(initialsDisk);
 }
 
