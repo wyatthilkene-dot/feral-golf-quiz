@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "pick-your-feral": {
+      "type": "pick-your-feral",
+      "settings": {}
+    }
+  },
+  "order": ["pick-your-feral"]
+}

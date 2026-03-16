@@ -1,0 +1,910 @@
+{% comment %}
+  Pick Your Feral — Product Recommendation Quiz
+  Section: sections/pick-your-feral.liquid
+  Template: templates/page.pick-your-feral.json
+  Install: See INSTALL.md
+{% endcomment %}
+
+<style>
+  :root {
+    --pyf-bg: #1c302b;
+    --pyf-card: #243d37;
+    --pyf-border: #2e5048;
+    --pyf-accent: #a1d9c6;
+    --pyf-gold: #c8a84b;
+    --pyf-text: #f1f3f3;
+    --pyf-muted: #7aab9a;
+    --pyf-danger: #e05c5c;
+    --pyf-radius: 12px;
+    --pyf-font: 'Rubik', system-ui, sans-serif;
+  }
+
+  .pyf-root * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .pyf-root {
+    font-family: var(--pyf-font);
+    background: var(--pyf-bg);
+    color: var(--pyf-text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── HERO ─────────────────────────────────── */
+  .pyf-hero {
+    text-align: center;
+    padding: 80px 24px 60px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .pyf-hero-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--pyf-accent);
+    margin-bottom: 16px;
+  }
+  .pyf-hero h1 {
+    font-size: clamp(2.4rem, 7vw, 4rem);
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    color: var(--pyf-text);
+  }
+  .pyf-hero h1 span { color: var(--pyf-accent); }
+  .pyf-hero-desc {
+    font-size: 1rem;
+    color: var(--pyf-muted);
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+  .pyf-start-btn {
+    background: var(--pyf-accent);
+    color: #0d1f1a;
+    font-family: var(--pyf-font);
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: .04em;
+    transition: transform .15s, opacity .15s;
+  }
+  .pyf-start-btn:hover { opacity: .88; transform: translateY(-2px); }
+
+  /* ── QUIZ SHELL ────────────────────────────── */
+  .pyf-quiz {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* Progress */
+  .pyf-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    padding-top: 24px;
+  }
+  .pyf-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--pyf-border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .pyf-progress-fill {
+    height: 100%;
+    background: var(--pyf-accent);
+    border-radius: 2px;
+    transition: width .4s ease;
+  }
+  .pyf-progress-label {
+    font-size: .75rem;
+    color: var(--pyf-muted);
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  /* Question */
+  .pyf-question {
+    animation: pyf-fadeup .35s ease both;
+  }
+  @keyframes pyf-fadeup {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .pyf-q-eyebrow {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--pyf-accent);
+    margin-bottom: 10px;
+  }
+  .pyf-q-text {
+    font-size: clamp(1.35rem, 4vw, 1.85rem);
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.2;
+    margin-bottom: 32px;
+    color: var(--pyf-text);
+  }
+
+  /* Answer Cards */
+  .pyf-answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 520px) {
+    .pyf-answers { grid-template-columns: 1fr; }
+  }
+  .pyf-answer {
+    background: var(--pyf-card);
+    border: 2px solid var(--pyf-border);
+    border-radius: var(--pyf-radius);
+    padding: 20px 18px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s, transform .15s;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .pyf-answer:hover {
+    border-color: var(--pyf-accent);
+    background: #2a4a42;
+    transform: translateY(-2px);
+  }
+  .pyf-answer.selected {
+    border-color: var(--pyf-accent);
+    background: #1e3d35;
+  }
+  .pyf-answer-icon {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .pyf-answer-text {
+    font-size: .92rem;
+    font-weight: 600;
+    color: var(--pyf-text);
+    line-height: 1.4;
+  }
+  .pyf-answer-sub {
+    font-size: .78rem;
+    color: var(--pyf-muted);
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  /* ── RESULTS ───────────────────────────────── */
+  .pyf-results {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    animation: pyf-fadeup .4s ease both;
+  }
+  .pyf-results-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .pyf-results-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--pyf-accent);
+    margin-bottom: 10px;
+  }
+  .pyf-results-headline {
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 700;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+  .pyf-results-sub {
+    color: var(--pyf-muted);
+    font-size: .95rem;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Product Grid */
+  .pyf-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .pyf-product-card {
+    background: var(--pyf-card);
+    border: 1px solid var(--pyf-border);
+    border-radius: var(--pyf-radius);
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+    display: flex;
+    flex-direction: column;
+  }
+  .pyf-product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,.3);
+  }
+  .pyf-product-card.top-pick {
+    border-color: var(--pyf-accent);
+    position: relative;
+  }
+  .pyf-top-pick-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--pyf-accent);
+    color: #0d1f1a;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .pyf-product-card.coming-soon {
+    border-color: var(--pyf-gold);
+    opacity: .95;
+  }
+  .pyf-coming-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--pyf-gold);
+    color: #0d1f1a;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .pyf-product-img-wrap {
+    width: 100%;
+    aspect-ratio: 1;
+    background: #1a2e28;
+    overflow: hidden;
+    position: relative;
+  }
+  .pyf-product-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .3s;
+  }
+  .pyf-product-card:hover .pyf-product-img-wrap img {
+    transform: scale(1.04);
+  }
+  .pyf-product-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    background: linear-gradient(135deg, #1e3530, #2a4a42);
+  }
+  .pyf-product-body {
+    padding: 18px 18px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .pyf-product-name {
+    font-size: 1rem;
+    font-weight: 700;
+    font-style: italic;
+    margin-bottom: 4px;
+    color: var(--pyf-text);
+  }
+  .pyf-product-tagline {
+    font-size: .8rem;
+    color: var(--pyf-muted);
+    line-height: 1.5;
+    margin-bottom: 14px;
+    flex: 1;
+  }
+  .pyf-product-price {
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--pyf-accent);
+    margin-bottom: 12px;
+  }
+  .pyf-btn-shop {
+    display: block;
+    text-align: center;
+    background: var(--pyf-accent);
+    color: #0d1f1a;
+    font-family: var(--pyf-font);
+    font-size: .88rem;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity .15s;
+    margin-bottom: 8px;
+  }
+  .pyf-btn-shop:hover { opacity: .85; }
+  .pyf-btn-notify {
+    display: block;
+    text-align: center;
+    background: transparent;
+    color: var(--pyf-gold);
+    font-family: var(--pyf-font);
+    font-size: .88rem;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--pyf-gold);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    margin-bottom: 8px;
+    text-decoration: none;
+  }
+  .pyf-btn-notify:hover {
+    background: var(--pyf-gold);
+    color: #0d1f1a;
+  }
+  .pyf-btn-cart {
+    display: block;
+    text-align: center;
+    background: transparent;
+    color: var(--pyf-text);
+    font-family: var(--pyf-font);
+    font-size: .82rem;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--pyf-border);
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+    width: 100%;
+  }
+  .pyf-btn-cart:hover { border-color: var(--pyf-accent); color: var(--pyf-accent); }
+  .pyf-btn-cart.adding { opacity: .6; pointer-events: none; }
+
+  /* Restart */
+  .pyf-restart-wrap { text-align: center; }
+  .pyf-restart-btn {
+    background: transparent;
+    border: 1.5px solid var(--pyf-border);
+    color: var(--pyf-muted);
+    font-family: var(--pyf-font);
+    font-size: .85rem;
+    padding: 12px 28px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  .pyf-restart-btn:hover { border-color: var(--pyf-accent); color: var(--pyf-accent); }
+
+  /* Notify modal */
+  .pyf-modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .pyf-modal-overlay.open { display: flex; }
+  .pyf-modal {
+    background: var(--pyf-card);
+    border: 1px solid var(--pyf-gold);
+    border-radius: 16px;
+    padding: 36px 32px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+  }
+  .pyf-modal h3 { font-size: 1.3rem; font-style: italic; font-weight: 700; margin-bottom: 8px; }
+  .pyf-modal p { color: var(--pyf-muted); font-size: .88rem; margin-bottom: 20px; line-height: 1.5; }
+  .pyf-modal input {
+    width: 100%; padding: 12px 16px; border-radius: 8px;
+    background: var(--pyf-bg); border: 1.5px solid var(--pyf-border);
+    color: var(--pyf-text); font-family: var(--pyf-font); font-size: .92rem;
+    margin-bottom: 10px;
+  }
+  .pyf-modal input:focus { outline: none; border-color: var(--pyf-gold); }
+  .pyf-modal-submit {
+    width: 100%; padding: 13px; border-radius: 8px;
+    background: var(--pyf-gold); color: #0d1f1a;
+    font-family: var(--pyf-font); font-weight: 700; font-size: .95rem;
+    border: none; cursor: pointer; transition: opacity .15s;
+    margin-bottom: 10px;
+  }
+  .pyf-modal-submit:hover { opacity: .85; }
+  .pyf-modal-close {
+    background: none; border: none; color: var(--pyf-muted);
+    font-size: .82rem; cursor: pointer; text-decoration: underline; font-family: var(--pyf-font);
+  }
+</style>
+
+<div class="pyf-root" id="pyf-root">
+
+  <!-- ── HERO ─────────────────────────────────────── -->
+  <div id="pyf-hero">
+    <div class="pyf-hero">
+      <div class="pyf-hero-eyebrow">Feral Golf Co.</div>
+      <h1>Pick Your <span>Feral</span></h1>
+      <p class="pyf-hero-desc">4 questions. We'll match you to the ferrule that fits your game, your personality, and your on-course energy.</p>
+      <button class="pyf-start-btn" onclick="pyfStart()">Find My Ferrule &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── QUIZ ──────────────────────────────────────── -->
+  <div id="pyf-quiz" class="pyf-quiz" style="display:none">
+    <div class="pyf-progress-wrap">
+      <div class="pyf-progress-bar">
+        <div class="pyf-progress-fill" id="pyf-progress-fill" style="width:0%"></div>
+      </div>
+      <div class="pyf-progress-label" id="pyf-progress-label">1 / 4</div>
+    </div>
+    <div id="pyf-question-wrap"></div>
+  </div>
+
+  <!-- ── RESULTS ────────────────────────────────────── -->
+  <div id="pyf-results" class="pyf-results" style="display:none">
+    <div class="pyf-results-header">
+      <div class="pyf-results-eyebrow">Your Matches</div>
+      <div class="pyf-results-headline" id="pyf-results-headline">Your Feral Ferrules</div>
+      <p class="pyf-results-sub" id="pyf-results-sub"></p>
+    </div>
+    <div class="pyf-product-grid" id="pyf-product-grid"></div>
+    <div class="pyf-restart-wrap">
+      <button class="pyf-restart-btn" onclick="pyfRestart()">&larr; Start Over</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Notify Modal -->
+<div class="pyf-modal-overlay" id="pyf-modal">
+  <div class="pyf-modal">
+    <div style="font-size:1.8rem;margin-bottom:12px">🔥</div>
+    <h3>The Kyro Feral is Coming</h3>
+    <p>Drop your email and you'll be first in line when the performance ferrule launches.</p>
+    <input type="email" id="pyf-notify-email" placeholder="your@email.com">
+    <button class="pyf-modal-submit" onclick="pyfNotifySubmit()">Notify Me</button>
+    <button class="pyf-modal-close" onclick="pyfCloseModal()">No thanks</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// QUIZ DATA
+// ═══════════════════════════════════════════════════════════════
+
+const PYF_QUESTIONS = [
+  {
+    eyebrow: "On the Course",
+    text: "What kind of golfer are you?",
+    answers: [
+      { text: "All business. I'm here to score.", sub: "Every shot counts. No distractions.", icon: "🎯", tags: {minimal:2, clean:2, neutral:1} },
+      { text: "Golf is my aesthetic.", sub: "The fit matters as much as the swing.", icon: "🔥", tags: {bold:2, creative:2, statement:1} },
+      { text: "Here to make people do a double take.", sub: "On and off the green.", icon: "😤", tags: {wild:2, statement:2, personal:1} }
+    ]
+  },
+  {
+    eyebrow: "Off the Course",
+    text: "Off the course, you're most likely found...",
+    answers: [
+      { text: "In the wild — hiking, hunting, outdoors.", sub: "Nature is the vibe.", icon: "🌲", tags: {earth:3, outdoorsy:3} },
+      { text: "At an art show or making something.", sub: "Creative energy, always.", icon: "🎨", tags: {creative:3, personal:2} },
+      { text: "Being chaotic and making people laugh.", sub: "Chaos is a lifestyle.", icon: "🌮", tags: {wild:3, statement:2} },
+      { text: "Clean, low-key. No extra noise.", sub: "Less is more.", icon: "🧊", tags: {minimal:3, clean:3, neutral:2} }
+    ]
+  },
+  {
+    eyebrow: "Color Energy",
+    text: "Pick your color palette:",
+    answers: [
+      { text: "Earth tones — greens, grays, camo.", sub: "Tactical and grounded.", icon: "🌿", tags: {earth:3, outdoorsy:1, neutral:1} },
+      { text: "Ocean blues — cool, flowing, calm.", sub: "Gradient energy.", icon: "🌊", tags: {cool:3, neutral:1} },
+      { text: "Bold and loud. Unapologetic.", sub: "Go big or go home.", icon: "🦚", tags: {bold:3, statement:2, creative:1} },
+      { text: "Clean neutrals. Let the texture talk.", sub: "Subtle flex hits different.", icon: "⚡", tags: {neutral:3, minimal:2, clean:2} }
+    ]
+  },
+  {
+    eyebrow: "The Impression",
+    text: "Someone sees your clubs for the first time. You want them to say:",
+    answers: [
+      { text: '"What the hell are those?!"', sub: "The jaw-drop reaction.", icon: "👀", tags: {statement:3, bold:2} },
+      { text: '"Ha — that\'s so you."', sub: "Instantly recognizable.", icon: "😂", tags: {personal:3, wild:1, creative:1} },
+      { text: '"Those are clean as hell."', sub: "Understated and sharp.", icon: "😎", tags: {clean:3, minimal:2, neutral:1} },
+      { text: '"...are those hot dogs?"', sub: "Peak chaos. Perfect.", icon: "🌭", tags: {wild:3, statement:1} }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════
+// FERRULE CATALOG — tags rated 0-3 per attribute
+// ═══════════════════════════════════════════════════════════════
+const PYF_FERRULES = [
+  {
+    name: "Kyro Feral",
+    handle: "kyro-feral-performance-ferrule",
+    tagline: "Pure performance. Built for the grind, not the gallery.",
+    comingSoon: true,
+    tags: {earth:0, cool:2, bold:1, neutral:2, outdoorsy:0, creative:0, wild:0, minimal:3, statement:0, personal:0, clean:3}
+  },
+  {
+    name: "Blue Dream",
+    handle: "feral-golf-blue-dream-ferrule-ocean-gradient-copy",
+    tagline: "Cool, calm, and dialed in.",
+    tags: {earth:0, cool:3, bold:0, neutral:1, outdoorsy:0, creative:2, wild:0, minimal:1, statement:1, personal:0, clean:2}
+  },
+  {
+    name: "Blue Spring",
+    handle: "feral-golf-blue-spring-golf-club-ferrule",
+    tagline: "Fresh energy, every round.",
+    tags: {earth:0, cool:2, bold:0, neutral:1, outdoorsy:0, creative:3, wild:0, minimal:0, statement:1, personal:2, clean:1}
+  },
+  {
+    name: "Camo",
+    handle: "feral-golf-camo-golf-ferrule-tactical-style",
+    tagline: "Hunt birdies in stealth mode.",
+    tags: {earth:3, cool:0, bold:0, neutral:1, outdoorsy:3, creative:0, wild:0, minimal:0, statement:2, personal:1, clean:0}
+  },
+  {
+    name: "El Taco",
+    handle: "feral-golf-el-taco-ferrule-taco-pattern",
+    tagline: "Life's too short for boring ferrules.",
+    tags: {earth:0, cool:0, bold:2, neutral:0, outdoorsy:0, creative:1, wild:3, minimal:0, statement:2, personal:1, clean:0}
+  },
+  {
+    name: "Elephant Skin",
+    handle: "feral-golf-elephant-skin-golf-ferrule-textured-grey",
+    tagline: "Subtle flex. They'll notice.",
+    tags: {earth:2, cool:1, bold:0, neutral:3, outdoorsy:1, creative:1, wild:0, minimal:2, statement:0, personal:1, clean:3}
+  },
+  {
+    name: "Neo Geo",
+    handle: "feral-golf-neo-geo-golf-ferrule-geometric-throwback",
+    tagline: "Geometric chaos. Retro swagger.",
+    tags: {earth:0, cool:1, bold:2, neutral:0, outdoorsy:0, creative:3, wild:1, minimal:0, statement:2, personal:1, clean:0}
+  },
+  {
+    name: "Palm Trees",
+    handle: "feral-golf-palm-trees-golf-ferrule-swing-in-the-breeze",
+    tagline: "Every round feels like vacation.",
+    tags: {earth:1, cool:2, bold:1, neutral:0, outdoorsy:2, creative:1, wild:1, minimal:0, statement:1, personal:2, clean:1}
+  },
+  {
+    name: "Pineapple",
+    handle: "feral-golf-pineapple-golf-ferrule-sweet-swing-energy",
+    tagline: "Sweet swing energy. Loud and proud.",
+    tags: {earth:0, cool:0, bold:2, neutral:0, outdoorsy:0, creative:1, wild:2, minimal:0, statement:2, personal:1, clean:0}
+  },
+  {
+    name: "Pink Camo",
+    handle: "feral-golf-pink-camo-ferrule-tactical-style",
+    tagline: "Tactical. Bold. Unapologetically you.",
+    tags: {earth:2, cool:0, bold:3, neutral:0, outdoorsy:2, creative:0, wild:1, minimal:0, statement:3, personal:1, clean:0}
+  },
+  {
+    name: "The Glizzy",
+    handle: "feral-golf-the-glizzy-golf-ferrule-hot-dog-pattern",
+    tagline: "You're not here to blend in.",
+    tags: {earth:0, cool:0, bold:1, neutral:0, outdoorsy:0, creative:1, wild:3, minimal:0, statement:2, personal:0, clean:0}
+  },
+  {
+    name: "The Maxx",
+    handle: "the-maxx-saved-by-the-swing",
+    tagline: "Saved by the swing. Maximum personality.",
+    tags: {earth:0, cool:0, bold:3, neutral:0, outdoorsy:0, creative:2, wild:2, minimal:0, statement:3, personal:2, clean:0}
+  },
+  {
+    name: "The Monogram",
+    handle: "feral-golf-the-monogram-golf-ferrule-personalized-initials",
+    tagline: "Your initials. Your identity. Custom-made.",
+    tags: {earth:0, cool:0, bold:0, neutral:2, outdoorsy:0, creative:2, wild:0, minimal:3, statement:1, personal:3, clean:2}
+  },
+  {
+    name: "The Peacock",
+    handle: "feral-golf-the-peacock-ferrule-feather-theme",
+    tagline: "Spread your wings. Every round.",
+    tags: {earth:1, cool:1, bold:3, neutral:0, outdoorsy:1, creative:3, wild:1, minimal:0, statement:3, personal:2, clean:0}
+  },
+  {
+    name: "The Pollack",
+    handle: "feral-golf-the-pollack-golf-ferrule-abstract-paint-splatter",
+    tagline: "Art on your irons. Abstract energy.",
+    tags: {earth:0, cool:1, bold:3, neutral:0, outdoorsy:0, creative:3, wild:1, minimal:0, statement:2, personal:2, clean:0}
+  },
+  {
+    name: "The Red Pollack",
+    handle: "feral-golf-the-red-pollack-ferrule-abstract-paint-splatter",
+    tagline: "Warm chaos. Red-hot swagger.",
+    tags: {earth:1, cool:0, bold:3, neutral:0, outdoorsy:0, creative:3, wild:1, minimal:0, statement:2, personal:2, clean:0}
+  },
+  {
+    name: "The Wave",
+    handle: "feral-golf-the-wave-golf-ferrule",
+    tagline: "Ride the gradient. Stay cool.",
+    tags: {earth:0, cool:3, bold:1, neutral:1, outdoorsy:0, creative:2, wild:0, minimal:1, statement:1, personal:1, clean:2}
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════
+// RESULT HEADLINE COPY — based on dominant tag
+// ═══════════════════════════════════════════════════════════════
+const PYF_HEADLINES = {
+  wild:      ["Certified Chaotic Good", "Pure Feral Energy"],
+  bold:      ["Maximum Statement. Zero Apologies.", "Built to Be Seen"],
+  creative:  ["Artist on the Fairway", "You See the Course Differently"],
+  outdoorsy: ["Born in the Wild. Plays in the Wild.", "Tactical. Grounded. Feral."],
+  minimal:   ["Precision Over Everything", "Clean Game. Sharp Clubs."],
+  cool:      ["Cool Runs Deep", "Ocean Energy. Every Round."],
+  earth:     ["Rooted. Tactical. Feral.", "Earthy by Nature. Wild by Choice."],
+  clean:     ["Sharp. Dialed. Dangerous.", "Clean Clubs. Loud Game."],
+  personal:  ["Unmistakably You", "Your Story. On Every Club."],
+  statement: ["The Double-Take Is the Point", "They Will Notice."]
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let pyfScores = {};
+let pyfCurrentQ = 0;
+const PYF_TOTAL = PYF_QUESTIONS.length;
+
+function pyfResetScores() {
+  pyfScores = {earth:0,cool:0,bold:0,neutral:0,outdoorsy:0,creative:0,wild:0,minimal:0,statement:0,personal:0,clean:0};
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCORING
+// ═══════════════════════════════════════════════════════════════
+function pyfScoreFerrule(ferrule) {
+  return Object.keys(ferrule.tags).reduce((sum, tag) => {
+    return sum + (ferrule.tags[tag] || 0) * (pyfScores[tag] || 0);
+  }, 0);
+}
+
+function pyfGetTopFerrules(n) {
+  return PYF_FERRULES
+    .map(f => ({ ...f, score: pyfScoreFerrule(f) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, n);
+}
+
+function pyfDominantTag() {
+  return Object.keys(pyfScores).reduce((a, b) => pyfScores[a] >= pyfScores[b] ? a : b);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FLOW
+// ═══════════════════════════════════════════════════════════════
+function pyfStart() {
+  pyfResetScores();
+  pyfCurrentQ = 0;
+  document.getElementById('pyf-hero').style.display = 'none';
+  document.getElementById('pyf-results').style.display = 'none';
+  document.getElementById('pyf-quiz').style.display = 'block';
+  pyfRenderQuestion();
+}
+
+function pyfRestart() {
+  document.getElementById('pyf-results').style.display = 'none';
+  pyfStart();
+}
+
+function pyfSelectAnswer(answerIndex) {
+  const q = PYF_QUESTIONS[pyfCurrentQ];
+  const answer = q.answers[answerIndex];
+
+  // Apply tags
+  Object.keys(answer.tags).forEach(tag => {
+    pyfScores[tag] = (pyfScores[tag] || 0) + answer.tags[tag];
+  });
+
+  // Flash selected state briefly
+  const cards = document.querySelectorAll('.pyf-answer');
+  if (cards[answerIndex]) {
+    cards[answerIndex].classList.add('selected');
+  }
+
+  setTimeout(() => {
+    pyfCurrentQ++;
+    if (pyfCurrentQ < PYF_TOTAL) {
+      pyfRenderQuestion();
+    } else {
+      pyfShowResults();
+    }
+  }, 280);
+}
+
+function pyfRenderQuestion() {
+  const q = PYF_QUESTIONS[pyfCurrentQ];
+  const pct = (pyfCurrentQ / PYF_TOTAL) * 100;
+  document.getElementById('pyf-progress-fill').style.width = pct + '%';
+  document.getElementById('pyf-progress-label').textContent = (pyfCurrentQ + 1) + ' / ' + PYF_TOTAL;
+
+  const wrap = document.getElementById('pyf-question-wrap');
+  wrap.innerHTML = `
+    <div class="pyf-question">
+      <div class="pyf-q-eyebrow">${q.eyebrow}</div>
+      <div class="pyf-q-text">${q.text}</div>
+      <div class="pyf-answers">
+        ${q.answers.map((a, i) => `
+          <button class="pyf-answer" onclick="pyfSelectAnswer(${i})">
+            <div class="pyf-answer-icon">${a.icon}</div>
+            <div>
+              <div class="pyf-answer-text">${a.text}</div>
+              ${a.sub ? `<div class="pyf-answer-sub">${a.sub}</div>` : ''}
+            </div>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RESULTS
+// ═══════════════════════════════════════════════════════════════
+async function pyfShowResults() {
+  document.getElementById('pyf-quiz').style.display = 'none';
+  document.getElementById('pyf-results').style.display = 'block';
+
+  const topFerrules = pyfGetTopFerrules(3);
+  const dom = pyfDominantTag();
+  const headlines = PYF_HEADLINES[dom] || ["Your Feral Ferrules"];
+  const headline = headlines[Math.floor(Math.random() * headlines.length)];
+
+  document.getElementById('pyf-results-headline').textContent = headline;
+  document.getElementById('pyf-results-sub').textContent =
+    "Based on your answers, here are the ferrules built for your game.";
+
+  const grid = document.getElementById('pyf-product-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--pyf-muted);padding:20px">Loading your matches...</div>';
+
+  const cards = await Promise.all(topFerrules.map((f, i) => pyfBuildCard(f, i === 0)));
+  grid.innerHTML = cards.join('');
+}
+
+async function pyfBuildCard(ferrule, isTopPick) {
+  if (ferrule.comingSoon) {
+    return `
+      <div class="pyf-product-card coming-soon" style="position:relative">
+        <span class="pyf-coming-badge">Coming Soon</span>
+        <div class="pyf-product-img-wrap">
+          <div class="pyf-product-img-placeholder">⚡</div>
+        </div>
+        <div class="pyf-product-body">
+          <div class="pyf-product-name">${ferrule.name}</div>
+          <div class="pyf-product-tagline">${ferrule.tagline}</div>
+          <div class="pyf-product-price" style="color:var(--pyf-gold)">Drop Incoming</div>
+          <button class="pyf-btn-notify" onclick="pyfOpenModal()">🔔 Notify Me at Launch</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // Fetch real product data from Shopify
+  let imgSrc = null;
+  let price = null;
+  let variantId = null;
+
+  try {
+    const res = await fetch(`/products/${ferrule.handle}.js`);
+    if (res.ok) {
+      const data = await res.json();
+      imgSrc = data.featured_image;
+      price = (data.price / 100).toFixed(2);
+      variantId = data.variants?.[0]?.id;
+    }
+  } catch(e) { /* fallback below */ }
+
+  const imgHtml = imgSrc
+    ? `<img src="${imgSrc}" alt="${ferrule.name}" loading="lazy">`
+    : `<div class="pyf-product-img-placeholder">⛳</div>`;
+
+  const priceHtml = price ? `$${price}` : '';
+
+  const cartBtn = variantId
+    ? `<button class="pyf-btn-cart" id="cart-btn-${variantId}" onclick="pyfAddToCart(${variantId}, this)">+ Add to Cart</button>`
+    : '';
+
+  return `
+    <div class="pyf-product-card${isTopPick ? ' top-pick' : ''}" style="position:relative">
+      ${isTopPick ? '<span class="pyf-top-pick-badge">Top Match</span>' : ''}
+      <div class="pyf-product-img-wrap">${imgHtml}</div>
+      <div class="pyf-product-body">
+        <div class="pyf-product-name">${ferrule.name}</div>
+        <div class="pyf-product-tagline">${ferrule.tagline}</div>
+        ${priceHtml ? `<div class="pyf-product-price">${priceHtml}</div>` : ''}
+        <a class="pyf-btn-shop" href="/products/${ferrule.handle}">Shop Now &rarr;</a>
+        ${cartBtn}
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADD TO CART
+// ═══════════════════════════════════════════════════════════════
+async function pyfAddToCart(variantId, btn) {
+  btn.textContent = 'Adding...';
+  btn.classList.add('adding');
+  try {
+    const res = await fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: variantId, quantity: 1 })
+    });
+    if (res.ok) {
+      btn.textContent = '✓ Added!';
+      btn.style.color = 'var(--pyf-accent)';
+      btn.style.borderColor = 'var(--pyf-accent)';
+      setTimeout(() => {
+        btn.textContent = '+ Add to Cart';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+        btn.classList.remove('adding');
+      }, 2500);
+    } else {
+      btn.textContent = 'Error — try again';
+      btn.classList.remove('adding');
+    }
+  } catch(e) {
+    btn.textContent = 'Error — try again';
+    btn.classList.remove('adding');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NOTIFY MODAL (Kyro Feral)
+// ═══════════════════════════════════════════════════════════════
+function pyfOpenModal() {
+  document.getElementById('pyf-modal').classList.add('open');
+}
+function pyfCloseModal() {
+  document.getElementById('pyf-modal').classList.remove('open');
+}
+async function pyfNotifySubmit() {
+  const email = document.getElementById('pyf-notify-email').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('pyf-notify-email').style.borderColor = 'var(--pyf-danger)';
+    return;
+  }
+  // POST to Shopify Customer / Klaviyo / or your email capture endpoint
+  // Replace the URL below with your actual email capture endpoint or Klaviyo list subscribe URL
+  try {
+    await fetch('/contact#contact_form', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        form_type: 'customer',
+        utf8: '✓',
+        'contact[email]': email,
+        'contact[body]': 'Kyro Feral launch notification signup via Pick Your Feral quiz'
+      })
+    });
+  } catch(e) { /* silent fail */ }
+
+  document.getElementById('pyf-modal').innerHTML = `
+    <div class="pyf-modal">
+      <div style="font-size:2rem;margin-bottom:12px">✅</div>
+      <h3>You're on the list.</h3>
+      <p style="margin-bottom:20px">We'll hit you the second the Kyro Feral drops. Stay feral.</p>
+      <button class="pyf-modal-submit" onclick="pyfCloseModal()">Close</button>
+    </div>
+  `;
+}
+</script>
