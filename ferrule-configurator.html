@@ -208,6 +208,19 @@
       </div>
     </div>
     <div class="preset-row" id="feat-presets"></div>
+    <div class="trow" style="margin-top:10px">
+      <span class="tlbl">Gradient (blend 2 feature colors)</span>
+      <div class="tog" id="gtog" onclick="toggleGradient(this)"></div>
+    </div>
+    <div id="grad-row" style="display:none;margin-top:10px">
+      <div class="cpick-row">
+        <span class="cpick-label">Feature color 2 <span style="font-size:.68rem;color:var(--mut)">(top)</span></span>
+        <div class="cpick-wrap" id="feat2-wrap">
+          <div class="cpick-swatch" id="feat2-swatch" style="background:#c8a84b"></div>
+          <input type="color" id="feat2-picker" value="#c8a84b" oninput="setFeature2(this.value)">
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Initials -->
@@ -288,7 +301,9 @@ const FONT_CSS = {
 const S = {
   shape:       'pyramid',
   surface:     '#f0f0f0',   // flat grid base
-  feature:     '#1c1c1c',   // pyramids / dimple dots
+  feature:     '#1c1c1c',   // pyramids / dimple dots (gradient start)
+  feature2:    '#c8a84b',   // gradient end color (bottom → top blend)
+  gradient:    false,
   initColor:   '#c8a84b',   // initials text color
   initials:    '',
   font:        'sans',
@@ -369,7 +384,11 @@ const VERT = `
 
 const FRAG = `
   uniform vec3  uSurface;     // flat body / grid base color
-  uniform vec3  uFeature;     // pyramid or dimple feature color
+  uniform vec3  uFeature;     // pyramid or dimple feature color (gradient bottom)
+  uniform vec3  uFeature2;    // gradient top color
+  uniform float uGradient;    // 0 = solid, 1 = gradient
+  uniform float uLocalYMin;   // raw local Y minimum (bottom of ferrule)
+  uniform float uLocalYMax;   // raw local Y maximum (top of ferrule)
   uniform vec2  uAxisXZ;      // ferrule axis center XZ in raw LOCAL vertex space
   uniform float uRawBoreR;    // bore radius in raw LOCAL vertex space
   uniform float uFeatTh;      // N·radial threshold (local space)
@@ -392,7 +411,15 @@ const FRAG = `
     bool isBore    = lr < uRawBoreR;
     bool isEndCap  = vabs > 0.75;
     bool isFeature = !isBore && !isEndCap && rdot < uFeatTh;
-    vec3 base = isFeature ? uFeature : uSurface;
+
+    // Feature color: solid or gradient blending bottom→top
+    vec3 featColor = uFeature;
+    if (uGradient > 0.5) {
+      float span = uLocalYMax - uLocalYMin;
+      float t = span > 0.001 ? clamp((vLocalPos.y - uLocalYMin) / span, 0.0, 1.0) : 0.0;
+      featColor = mix(uFeature, uFeature2, t);
+    }
+    vec3 base = isFeature ? featColor : uSurface;
 
     // ── Lighting (WORLD space) ──
     vec3 N  = normalize(vWorldNormal);
@@ -413,16 +440,20 @@ const FRAG = `
 
 const MODEL_FEAT_TH = { pyramid: 0.92, dimple: 0.97 };
 
-function makeMat(rawCX, rawCZ, rawBoreR, featTh) {
+function makeMat(rawCX, rawCZ, rawBoreR, featTh, rawYMin, rawYMax) {
   return new THREE.ShaderMaterial({
     vertexShader:   VERT,
     fragmentShader: FRAG,
     uniforms: {
-      uSurface:   { value: new THREE.Color(S.surface)  },
-      uFeature:   { value: new THREE.Color(S.feature)  },
-      uAxisXZ:    { value: new THREE.Vector2(rawCX, rawCZ) },
-      uRawBoreR:  { value: rawBoreR },
-      uFeatTh:    { value: featTh   },
+      uSurface:    { value: new THREE.Color(S.surface)  },
+      uFeature:    { value: new THREE.Color(S.feature)  },
+      uFeature2:   { value: new THREE.Color(S.feature2) },
+      uGradient:   { value: S.gradient ? 1.0 : 0.0     },
+      uLocalYMin:  { value: rawYMin },
+      uLocalYMax:  { value: rawYMax },
+      uAxisXZ:     { value: new THREE.Vector2(rawCX, rawCZ) },
+      uRawBoreR:   { value: rawBoreR },
+      uFeatTh:     { value: featTh   },
     },
     side: THREE.DoubleSide,
   });
@@ -503,8 +534,8 @@ function applyObj(obj) {
   obj.traverse(c => {
     if (!c.isMesh) return;
     if (!c.geometry.attributes.normal) c.geometry.computeVertexNormals();
-    // Pass raw-space axis XZ and bore radius — these never change with rotation
-    c.material      = makeMat(rawCenter.x, rawCenter.z, rawBoreR, featTh);
+    // Pass raw-space axis XZ, bore radius, and Y extents — never change with rotation
+    c.material      = makeMat(rawCenter.x, rawCenter.z, rawBoreR, featTh, rawBox.min.y, rawBox.max.y);
     c.castShadow    = true;
     c.receiveShadow = true;
   });
@@ -513,11 +544,11 @@ function applyObj(obj) {
   group.add(obj);
 
   // World-space cap geometry (for initials disk)
-  const worldMaxR = computeMaxWorldR(obj, rawCenter.x, rawCenter.z, scale);
-  // After centering: top of ferrule Y = (rawMaxY * scale) - scaledCenter.y
-  const worldTopY = (rawBox.max.y * scale) - scaledCenter.y;
+  const worldMaxR   = computeMaxWorldR(obj, rawCenter.x, rawCenter.z, scale);
+  const worldTopY   = (rawBox.max.y * scale) - scaledCenter.y;
+  const worldBottomY = (rawBox.min.y * scale) - scaledCenter.y;
 
-  _capInfo = { worldTopY, worldMaxR };
+  _capInfo = { worldTopY, worldBottomY, worldMaxR };
   rebuildInitials();
   setLoading(false);
 }
@@ -578,6 +609,8 @@ function updateColors() {
     if (!c.isMesh || !c.material?.uniforms) return;
     c.material.uniforms.uSurface.value.set(S.surface);
     c.material.uniforms.uFeature.value.set(S.feature);
+    c.material.uniforms.uFeature2.value.set(S.feature2);
+    c.material.uniforms.uGradient.value = S.gradient ? 1.0 : 0.0;
   });
 }
 
@@ -625,8 +658,8 @@ function rebuildInitials() {
   });
 
   initialsDisk = new THREE.Mesh(geo, mat);
-  initialsDisk.rotation.x = -Math.PI / 2;            // lay flat, facing up
-  initialsDisk.position.y  = _capInfo.worldTopY + 0.002; // sit on top cap surface
+  initialsDisk.rotation.x = Math.PI / 2;               // lay flat, facing down (hosel end)
+  initialsDisk.position.y = _capInfo.worldBottomY - 0.002; // sit on bottom (hosel) cap
   group.add(initialsDisk);
 }
 
@@ -674,6 +707,21 @@ function setFeature(hex) {
   updateColors();
 }
 
+function setFeature2(hex) {
+  S.feature2 = hex;
+  document.getElementById('feat2-swatch').style.background = hex;
+  document.getElementById('feat2-picker').value = hex;
+  updateColors();
+}
+
+function toggleGradient(el) {
+  el.classList.toggle('on');
+  S.gradient = el.classList.contains('on');
+  // show/hide second color row
+  document.getElementById('grad-row').style.display = S.gradient ? '' : 'none';
+  updateColors();
+}
+
 function setInitColor(hex) {
   S.initColor = hex;
   document.getElementById('ic-swatch').style.background = hex;
@@ -695,9 +743,13 @@ function toggleRot(el) {
 }
 
 function doReset() {
-  S.surface='#f0f0f0'; S.feature='#1c1c1c'; S.initColor='#c8a84b';
+  S.surface='#f0f0f0'; S.feature='#1c1c1c'; S.feature2='#c8a84b';
+  S.gradient=false; S.initColor='#c8a84b';
   S.initials=''; S.font='sans'; S.autoRot=true;
   setSurface('#f0f0f0'); setFeature('#1c1c1c');
+  setFeature2('#c8a84b');
+  document.getElementById('gtog').classList.remove('on');
+  document.getElementById('grad-row').style.display = 'none';
   document.getElementById('ic-swatch').style.background='#c8a84b';
   document.getElementById('ic-picker').value='#c8a84b';
   document.getElementById('ii').value='';
