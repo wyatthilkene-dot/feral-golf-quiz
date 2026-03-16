@@ -632,8 +632,8 @@ function rebuildInitials() {
   if (!S.initials.trim() || !_capInfo) return;
 
   const text = S.initials.trim().toUpperCase().slice(0,3);
-  // Wide landscape canvas — spans the smooth section side
-  const W = 768, H = 256;
+  // Landscape canvas matching the panel aspect ratio
+  const W = 512, H = 192;
   const cv  = document.createElement('canvas');
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
@@ -656,16 +656,21 @@ function rebuildInitials() {
   const tex = new THREE.CanvasTexture(cv);
   tex.encoding = THREE.sRGBEncoding;
 
-  // Flat disk on the TOP CAP face, lying flat and facing up
-  const diskR = _capInfo.worldMaxR * 0.80;
-  const geo   = new THREE.CircleGeometry(diskR, 64);
-  const mat   = new THREE.MeshBasicMaterial({
-    map: tex, transparent: true, depthWrite: false, depthTest: true,
+  // Panel on the SIDE of the smooth cap section, facing +Z (toward viewer)
+  // depthTest:false so it always renders on top of the surface
+  const totalH  = _capInfo.worldTopY - _capInfo.worldBottomY;
+  const planeW  = _capInfo.worldMaxR * 1.60;          // span most of smooth section width
+  const planeH  = totalH * 0.30;                      // 30% of ferrule height tall
+  const smoothY = _capInfo.worldBottomY + totalH * 0.73; // midpoint of smooth zone
+  const sideR   = _capInfo.worldMaxR * 1.02;          // just outside surface
+
+  const geo = new THREE.PlaneGeometry(planeW, planeH);
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, transparent: true, depthWrite: false, depthTest: false,
   });
 
   initialsDisk = new THREE.Mesh(geo, mat);
-  initialsDisk.rotation.x = -Math.PI / 2;             // flat, facing up
-  initialsDisk.position.y  = _capInfo.worldTopY + 0.002; // sit on top cap surface
+  initialsDisk.position.set(0, smoothY, sideR);  // faces +Z, rotates with group
   group.add(initialsDisk);
 }
 
