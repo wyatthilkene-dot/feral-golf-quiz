@@ -247,6 +247,16 @@
       </div>
     </div>
 
+    <!-- Quantity -->
+    <div class="kyro-sec">
+      <div class="kyro-sl">Quantity</div>
+      <div class="kyro-shape-row">
+        <button class="kyro-sbtn on" onclick="kyroSetQty(3,this)">3 pack</button>
+        <button class="kyro-sbtn" onclick="kyroSetQty(5,this)">5 pack</button>
+        <button class="kyro-sbtn" onclick="kyroSetQty(10,this)">10 pack</button>
+      </div>
+    </div>
+
     <!-- Controls -->
     <div class="kyro-sec">
       <div class="kyro-trow">
@@ -289,6 +299,12 @@ const KYRO_MODELS = {
   dimple:  {{ 'ferrule-dotted.obj' | asset_url | json }},
 };
 
+// Variant IDs: shape × qty  (fetched from /products/kyro-performance-ferrule.js)
+const KYRO_VARIANTS = {
+  pyramid: { 3: 47175228227767, 5: 47175228326071, 10: 47175228424375 }, // Pyramid Extruded
+  dimple:  { 3: 47175228260535, 5: 47175228358839, 10: 47175228457143 }, // Dimpled (Concave)
+};
+
 const PRESETS = [
   '#f1f3f3','#1c1c1c','#c8a84b','#c0392b','#2d6a4f',
   '#1e6091','#c8c8d8','#6c3483','#d35400','#a1d9c6',
@@ -306,6 +322,7 @@ const FONT_CSS = {
 // ═══════════════════════════════════════════════════════
 const S = {
   shape:    'pyramid',
+  qty:      3,
   surface:  '#f0f0f0',
   feature:  '#1c1c1c',
   feature2: '#c8a84b',
@@ -659,6 +676,11 @@ function kyroQueueInit(v) {
   _kyroIt = setTimeout(() => { S.initials = v; rebuildInitials(); }, 350);
 }
 function kyroSetFont(v) { S.font = v; rebuildInitials(); }
+function kyroSetQty(qty, btn) {
+  S.qty = qty;
+  btn.closest('.kyro-shape-row').querySelectorAll('.kyro-sbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
 function kyroToggleRot(el) {
   el.classList.toggle('on');
   S.autoRot = el.classList.contains('on');
@@ -698,7 +720,7 @@ function kyroSave() {
     form.appendChild(i);
   };
 
-  field('id',                         '4717521466181');
+  field('id',                         String(KYRO_VARIANTS[S.shape][S.qty]));
   field('quantity',                   '1');
   field('properties[Model]',          S.shape === 'pyramid' ? 'Pyramid' : 'Dimple');
   field('properties[Surface Color]',  S.surface);
@@ -730,7 +752,7 @@ loadShape('pyramid');
 Object.assign(window, {
   kyroSetShape, kyroSetSurface, kyroSetFeature, kyroSetFeature2,
   kyroToggleGradient, kyroSetInitColor, kyroQueueInit, kyroSetFont,
-  kyroToggleRot, kyroReset, kyroSave,
+  kyroToggleRot, kyroReset, kyroSave, kyroSetQty,
 });
 })();
 </script>
