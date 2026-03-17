@@ -679,7 +679,7 @@ function kyroReset() {
   document.querySelectorAll('.kyro-sbtn').forEach((b,i)=>b.classList.toggle('on',i===0));
   S.shape='pyramid'; loadShape('pyramid');
 }
-async function kyroSave() {
+function kyroSave() {
   // 1. Download screenshot
   renderer.render(scene, camera);
   const a = document.createElement('a');
@@ -687,31 +687,27 @@ async function kyroSave() {
   a.download = `kyro-feral-${S.shape}-${Date.now()}.png`;
   a.click();
 
-  // 2. Add to cart with configuration as line item properties
-  try {
-    const variantId = 4717521466181;
-    await fetch('/cart/add.js', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        items: [{
-          id: variantId,
-          quantity: 1,
-          properties: {
-            'Model':          S.shape === 'pyramid' ? 'Pyramid' : 'Dimple',
-            'Surface Color':  S.surface,
-            'Feature Color':  S.feature,
-            'Gradient':       S.gradient ? `${S.feature} → ${S.feature2}` : 'Off',
-            'Initials':       S.initials || '—',
-          }
-        }]
-      })
-    });
-    window.location.href = '/cart';
-  } catch (e) {
-    // Product not live yet — open product page in new tab
-    window.open('/products/kyro-performance-ferrule', '_blank');
-  }
+  // 2. Submit form to /cart/add — most reliable Shopify add-to-cart method
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/cart/add';
+
+  const field = (name, val) => {
+    const i = document.createElement('input');
+    i.type = 'hidden'; i.name = name; i.value = val;
+    form.appendChild(i);
+  };
+
+  field('id',                         '4717521466181');
+  field('quantity',                   '1');
+  field('properties[Model]',          S.shape === 'pyramid' ? 'Pyramid' : 'Dimple');
+  field('properties[Surface Color]',  S.surface);
+  field('properties[Feature Color]',  S.feature);
+  field('properties[Gradient]',       S.gradient ? `${S.feature} → ${S.feature2}` : 'Off');
+  field('properties[Initials]',       S.initials || '—');
+
+  document.body.appendChild(form);
+  form.submit();
 }
 
 // ═══════════════════════════════════════════════════════
