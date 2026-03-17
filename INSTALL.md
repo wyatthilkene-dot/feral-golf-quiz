@@ -1,4 +1,60 @@
-# Pick Your Feral — Shopify Install Guide
+# Feral Golf — Shopify Install Guide
+
+---
+
+# Part 1 — Kyro Feral 3D Configurator
+
+## Files
+
+```
+sections/ferrule-configurator.liquid      ← 3D configurator section
+templates/page.ferrule-configurator.json  ← page template
+models/ferrule.obj                        ← Pyramid model (upload as theme asset)
+models/ferrule-dotted.obj                 ← Dimple model (upload as theme asset)
+```
+
+## Step 1 — Upload the OBJ Models as Theme Assets
+
+1. Go to **Online Store → Themes → Edit code**
+2. In the left sidebar, scroll down to **Assets**
+3. Click **Add a new asset** → **Upload file**
+4. Upload `models/ferrule.obj` — name must stay exactly `ferrule.obj`
+5. Repeat for `models/ferrule-dotted.obj` — name must stay exactly `ferrule-dotted.obj`
+
+> The section references these via `{{ 'ferrule.obj' | asset_url }}` — filenames must match exactly.
+
+## Step 2 — Upload the Section
+
+1. Under **Sections**, click **Add a new section**
+2. Name it exactly: `ferrule-configurator`
+3. Delete placeholder code, paste full contents of `sections/ferrule-configurator.liquid`
+4. Click **Save**
+
+## Step 3 — Upload the Page Template
+
+1. Under **Templates**, click **Add a new template**
+2. Choose **page**, name it exactly: `ferrule-configurator`
+3. Delete placeholder code, paste full contents of `templates/page.ferrule-configurator.json`
+4. Click **Save**
+
+## Step 4 — Create the Page
+
+1. Go to **Online Store → Pages → Add page**
+2. Title: `Customize Your Ferrule` (or whatever you prefer)
+3. In the **Theme template** dropdown, select **page.ferrule-configurator**
+4. Click **Save**
+
+## Troubleshooting — Configurator
+
+| Issue | Fix |
+|-------|-----|
+| Models not loading | Confirm `ferrule.obj` / `ferrule-dotted.obj` exist under Assets with exact names |
+| Blank page / JS error | Check browser console; likely a CDN block on Three.js — add CDN to CSP if needed |
+| Configurator fills wrong height | Some themes add padding to sections; add `padding: 0` override to `.kyro-config-section` in theme CSS |
+
+---
+
+# Part 2 — Pick Your Feral Quiz
 
 ## Files
 

@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "ferrule-configurator": {
+      "type": "ferrule-configurator",
+      "settings": {}
+    }
+  },
+  "order": ["ferrule-configurator"]
+}

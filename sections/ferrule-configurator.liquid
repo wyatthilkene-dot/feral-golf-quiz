@@ -1,0 +1,713 @@
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
+
+<style>
+  #kyro-cfg-wrap *,
+  #kyro-cfg-wrap *::before,
+  #kyro-cfg-wrap *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Section takes full viewport height, overrides theme padding */
+  .shopify-section:has(#kyro-cfg-wrap) { padding: 0 !important; }
+
+  #kyro-cfg-wrap {
+    --bg:    #0f1a16;
+    --panel: #1c302b;
+    --bdr:   #2e5048;
+    --acc:   #a1d9c6;
+    --gold:  #c8a84b;
+    --txt:   #f1f3f3;
+    --mut:   #7aab9a;
+    --r:     10px;
+    --font:  'Rubik', system-ui, sans-serif;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--txt);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── PANEL ── */
+  #kyro-panel {
+    width:280px; min-width:280px;
+    background:var(--panel);
+    border-right:1px solid var(--bdr);
+    display:flex; flex-direction:column;
+    overflow-y:auto;
+  }
+  #kyro-panel::-webkit-scrollbar { width:3px; }
+  #kyro-panel::-webkit-scrollbar-thumb { background:var(--bdr); }
+
+  #kyro-ph { padding:22px 20px 16px; border-bottom:1px solid var(--bdr); flex-shrink:0; }
+  .kyro-ey { font-size:.6rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--acc); margin-bottom:4px; }
+  .kyro-pt { font-size:1.15rem; font-weight:700; font-style:italic; }
+  .kyro-ps { font-size:.72rem; color:var(--mut); margin-top:3px; }
+
+  .kyro-sec { padding:16px 20px; border-bottom:1px solid var(--bdr); }
+  .kyro-sl  { font-size:.6rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--mut); margin-bottom:10px; }
+
+  .kyro-shape-row { display:flex; gap:8px; }
+  .kyro-sbtn {
+    flex:1; padding:12px 8px 10px;
+    background:transparent; border:1.5px solid var(--bdr); border-radius:var(--r);
+    color:var(--txt); font-family:var(--font); font-size:.8rem; font-weight:600;
+    cursor:pointer; text-align:center; transition:border-color .2s, background .2s, color .2s;
+  }
+  .kyro-sbtn:hover { border-color:var(--acc); }
+  .kyro-sbtn.on { border-color:var(--acc); background:rgba(161,217,198,.1); color:var(--acc); }
+  .kyro-sbtn .si { font-size:1.4rem; display:block; margin-bottom:4px; }
+
+  .kyro-cpick-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .kyro-cpick-label { font-size:.8rem; font-weight:600; color:var(--txt); flex:1; }
+  .kyro-cpick-wrap {
+    position:relative; width:48px; height:36px;
+    border-radius:8px; overflow:hidden; cursor:pointer;
+    border:2px solid var(--bdr); transition:border-color .2s;
+    flex-shrink:0;
+  }
+  .kyro-cpick-wrap:hover { border-color:var(--acc); }
+  .kyro-cpick-wrap input[type="color"] {
+    position:absolute; inset:-8px; width:calc(100% + 16px); height:calc(100% + 16px);
+    opacity:0; cursor:pointer; border:none; padding:0;
+  }
+  .kyro-cpick-swatch { position:absolute; inset:0; pointer-events:none; }
+
+  .kyro-preset-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+  .kyro-pw {
+    width:24px; height:24px; border-radius:50%; cursor:pointer;
+    border:2px solid transparent; transition:transform .15s, border-color .15s; flex-shrink:0;
+  }
+  .kyro-pw:hover { transform:scale(1.2); }
+  .kyro-pw.on { border-color:#fff; }
+
+  .kyro-init-row { display:flex; gap:9px; }
+  .kyro-ii {
+    width:64px; padding:9px 6px;
+    background:var(--bg); border:1.5px solid var(--bdr); border-radius:8px;
+    color:var(--txt); font-family:var(--font); font-size:1rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:.1em; text-align:center;
+  }
+  .kyro-ii:focus { outline:none; border-color:var(--acc); }
+  .kyro-sel {
+    flex:1; padding:9px 28px 9px 10px;
+    background:var(--bg); border:1.5px solid var(--bdr); border-radius:8px;
+    color:var(--txt); font-family:var(--font); font-size:.8rem; cursor:pointer;
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237aab9a'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 10px center;
+  }
+  .kyro-sel:focus { outline:none; border-color:var(--acc); }
+
+  .kyro-trow { display:flex; align-items:center; justify-content:space-between; }
+  .kyro-tlbl { font-size:.78rem; color:var(--mut); }
+  .kyro-tog {
+    width:36px; height:20px; background:var(--bdr); border-radius:10px;
+    cursor:pointer; position:relative; transition:background .2s; flex-shrink:0;
+  }
+  .kyro-tog.on { background:var(--acc); }
+  .kyro-tog::after {
+    content:''; position:absolute; top:3px; left:3px;
+    width:14px; height:14px; background:#fff; border-radius:50%;
+    transition:transform .2s;
+  }
+  .kyro-tog.on::after { transform:translateX(16px); }
+
+  .kyro-ar {
+    display:flex; gap:8px; padding:15px 20px;
+    flex-shrink:0; margin-top:auto; border-top:1px solid var(--bdr);
+  }
+  .kyro-br {
+    flex:1; padding:11px; background:transparent;
+    border:1.5px solid var(--bdr); border-radius:8px;
+    color:var(--mut); font-family:var(--font); font-size:.8rem; font-weight:600;
+    cursor:pointer; transition:border-color .2s, color .2s;
+  }
+  .kyro-br:hover { border-color:var(--acc); color:var(--acc); }
+  .kyro-bs {
+    flex:1; padding:11px; background:var(--acc); border:none; border-radius:8px;
+    color:#0d1f1a; font-family:var(--font); font-size:.8rem; font-weight:700;
+    cursor:pointer; transition:opacity .15s;
+  }
+  .kyro-bs:hover { opacity:.85; }
+
+  /* ── VIEWPORT ── */
+  #kyro-vp { flex:1; position:relative; overflow:hidden; }
+  #kyro-vp canvas { display:block; width:100%!important; height:100%!important; }
+
+  #kyro-vp-hint {
+    position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
+    font-size:.62rem; color:rgba(161,217,198,.28);
+    letter-spacing:.1em; text-transform:uppercase;
+    pointer-events:none; white-space:nowrap;
+  }
+  #kyro-vp-status {
+    position:absolute; top:14px; right:14px;
+    font-size:.65rem; color:var(--mut);
+    background:rgba(15,26,22,.8); padding:5px 12px;
+    border-radius:20px; border:1px solid var(--bdr);
+  }
+  #kyro-vp-load {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:rgba(15,26,22,.9); pointer-events:none; transition:opacity .4s;
+  }
+  #kyro-vp-load span { font-size:.95rem; color:var(--acc); font-style:italic; font-weight:600; }
+  #kyro-vp-load small { font-size:.72rem; color:var(--mut); margin-top:6px; }
+
+  .kyro-spinner {
+    width:32px; height:32px; border:3px solid var(--bdr);
+    border-top-color:var(--acc); border-radius:50%;
+    animation:kyro-spin .8s linear infinite; margin-bottom:14px;
+  }
+  @keyframes kyro-spin { to { transform:rotate(360deg); } }
+</style>
+
+<div id="kyro-cfg-wrap">
+
+  <!-- ═══ PANEL ═══ -->
+  <div id="kyro-panel">
+
+    <div id="kyro-ph">
+      <div class="kyro-ey">Feral Golf Co.</div>
+      <div class="kyro-pt">Kyro Feral Configurator</div>
+      <div class="kyro-ps">Performance Ferrule — 3D Preview</div>
+    </div>
+
+    <!-- Shape -->
+    <div class="kyro-sec">
+      <div class="kyro-sl">Model Shape</div>
+      <div class="kyro-shape-row">
+        <button class="kyro-sbtn on" data-s="pyramid" onclick="kyroSetShape('pyramid',this)">
+          <span class="si">▲</span>Pyramid
+        </button>
+        <button class="kyro-sbtn" data-s="dimple" onclick="kyroSetShape('dimple',this)">
+          <span class="si">●</span>Dimple
+        </button>
+      </div>
+    </div>
+
+    <!-- Surface color -->
+    <div class="kyro-sec">
+      <div class="kyro-sl">Surface Color <span style="font-weight:400;color:var(--mut);text-transform:none;letter-spacing:0">(grid base body)</span></div>
+      <div class="kyro-cpick-row">
+        <span class="kyro-cpick-label">Pick color</span>
+        <div class="kyro-cpick-wrap">
+          <div class="kyro-cpick-swatch" id="kyro-surf-swatch" style="background:#f0f0f0"></div>
+          <input type="color" id="kyro-surf-picker" value="#f0f0f0" oninput="kyroSetSurface(this.value)">
+        </div>
+      </div>
+      <div class="kyro-preset-row" id="kyro-surf-presets"></div>
+    </div>
+
+    <!-- Feature color -->
+    <div class="kyro-sec">
+      <div class="kyro-sl">Feature Color <span style="font-weight:400;color:var(--mut);text-transform:none;letter-spacing:0">(pyramids / dots)</span></div>
+      <div class="kyro-cpick-row">
+        <span class="kyro-cpick-label">Pick color</span>
+        <div class="kyro-cpick-wrap">
+          <div class="kyro-cpick-swatch" id="kyro-feat-swatch" style="background:#1c1c1c"></div>
+          <input type="color" id="kyro-feat-picker" value="#1c1c1c" oninput="kyroSetFeature(this.value)">
+        </div>
+      </div>
+      <div class="kyro-preset-row" id="kyro-feat-presets"></div>
+      <div class="kyro-trow" style="margin-top:10px">
+        <span class="kyro-tlbl">Gradient (blend 2 feature colors)</span>
+        <div class="kyro-tog" id="kyro-gtog" onclick="kyroToggleGradient(this)"></div>
+      </div>
+      <div id="kyro-grad-row" style="display:none;margin-top:10px">
+        <div class="kyro-cpick-row">
+          <span class="kyro-cpick-label">Feature color 2 <span style="font-size:.68rem;color:var(--mut)">(top)</span></span>
+          <div class="kyro-cpick-wrap">
+            <div class="kyro-cpick-swatch" id="kyro-feat2-swatch" style="background:#c8a84b"></div>
+            <input type="color" id="kyro-feat2-picker" value="#c8a84b" oninput="kyroSetFeature2(this.value)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Initials -->
+    <div class="kyro-sec">
+      <div class="kyro-sl">Initials (optional)</div>
+      <div class="kyro-init-row">
+        <input class="kyro-ii" id="kyro-ii" type="text" maxlength="3" placeholder="—" oninput="kyroQueueInit(this.value)">
+        <select class="kyro-sel" id="kyro-fnt" onchange="kyroSetFont(this.value)">
+          <option value="sans">Sans-Serif</option>
+          <option value="serif">Serif</option>
+          <option value="script">Script</option>
+        </select>
+      </div>
+      <div class="kyro-cpick-row" style="margin-top:10px">
+        <span class="kyro-cpick-label">Initials color</span>
+        <div class="kyro-cpick-wrap">
+          <div class="kyro-cpick-swatch" id="kyro-ic-swatch" style="background:#c8a84b"></div>
+          <input type="color" id="kyro-ic-picker" value="#c8a84b" oninput="kyroSetInitColor(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="kyro-sec">
+      <div class="kyro-trow">
+        <span class="kyro-tlbl">Auto-rotate</span>
+        <div class="kyro-tog on" id="kyro-rtog" onclick="kyroToggleRot(this)"></div>
+      </div>
+    </div>
+
+    <div class="kyro-ar">
+      <button class="kyro-br" onclick="kyroReset()">↺ Reset</button>
+      <button class="kyro-bs" onclick="kyroSave()">📸 Save</button>
+    </div>
+  </div>
+
+  <!-- ═══ VIEWPORT ═══ -->
+  <div id="kyro-vp">
+    <canvas id="kyro-c"></canvas>
+    <div id="kyro-vp-status">Kyro Feral — Pyramid</div>
+    <div id="kyro-vp-hint">Drag to rotate · Scroll to zoom</div>
+    <div id="kyro-vp-load">
+      <div class="kyro-spinner"></div>
+      <span>Loading model…</span>
+      <small id="kyro-vp-load-sub"></small>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+
+<script>
+(function () {
+// ═══════════════════════════════════════════════════════
+// CONSTANTS — model URLs from Shopify theme assets CDN
+// ═══════════════════════════════════════════════════════
+const KYRO_MODELS = {
+  pyramid: {{ 'ferrule.obj'        | asset_url | json }},
+  dimple:  {{ 'ferrule-dotted.obj' | asset_url | json }},
+};
+
+const PRESETS = [
+  '#f1f3f3','#1c1c1c','#c8a84b','#c0392b','#2d6a4f',
+  '#1e6091','#c8c8d8','#6c3483','#d35400','#a1d9c6',
+  '#4a5e3a','#e8e0c8','#8b4513','#2c3e50','#e91e8c',
+];
+
+const FONT_CSS = {
+  sans:   s=>`700 ${s}px Arial,sans-serif`,
+  serif:  s=>`700 ${s}px Georgia,serif`,
+  script: s=>`italic 400 ${s}px "Palatino Linotype",Palatino,serif`,
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  shape:    'pyramid',
+  surface:  '#f0f0f0',
+  feature:  '#1c1c1c',
+  feature2: '#c8a84b',
+  gradient: false,
+  initColor:'#c8a84b',
+  initials: '',
+  font:     'sans',
+  autoRot:  true,
+};
+
+const cache = {};
+
+// ═══════════════════════════════════════════════════════
+// THREE.JS SETUP
+// ═══════════════════════════════════════════════════════
+const canvas   = document.getElementById('kyro-c');
+const vpEl     = document.getElementById('kyro-vp');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, preserveDrawingBuffer:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled   = true;
+renderer.outputEncoding      = THREE.sRGBEncoding;
+renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color('#0f1a16');
+
+const camera = new THREE.PerspectiveCamera(38, 1, 0.01, 500);
+camera.position.set(0, 0, 6);
+
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping   = true;
+controls.dampingFactor   = 0.06;
+controls.minDistance     = 2;
+controls.maxDistance     = 20;
+controls.autoRotate      = true;
+controls.autoRotateSpeed = 2.0;
+
+const gnd = new THREE.Mesh(
+  new THREE.PlaneGeometry(30,30),
+  new THREE.MeshStandardMaterial({ color:0x080f0c, roughness:0.95 })
+);
+gnd.rotation.x=-Math.PI/2; gnd.position.y=-2.2; gnd.receiveShadow=true;
+scene.add(gnd);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+const kl = new THREE.DirectionalLight(0xffffff, 1.2);
+kl.position.set(4,6,4); kl.castShadow=true; scene.add(kl);
+const fl = new THREE.DirectionalLight(0xa1d9c6, 0.45);
+fl.position.set(-4,2,-2); scene.add(fl);
+const rl = new THREE.DirectionalLight(0xffffff, 0.6);
+rl.position.set(0,-3,-5); scene.add(rl);
+
+const group = new THREE.Group();
+scene.add(group);
+
+// ═══════════════════════════════════════════════════════
+// SHADER
+// ═══════════════════════════════════════════════════════
+const VERT = `
+  varying vec3 vWorldNormal;
+  varying vec3 vLocalNormal;
+  varying vec3 vWorldPos;
+  varying vec3 vLocalPos;
+  varying vec3 vViewPos;
+  void main() {
+    vLocalPos    = position;
+    vLocalNormal = normal;
+    vec4 wp      = modelMatrix * vec4(position, 1.0);
+    vWorldPos    = wp.xyz;
+    vWorldNormal = normalize(normalMatrix * normal);
+    vec4 mvp     = modelViewMatrix * vec4(position, 1.0);
+    vViewPos     = -mvp.xyz;
+    gl_Position  = projectionMatrix * mvp;
+  }
+`;
+
+const FRAG = `
+  uniform vec3  uSurface;
+  uniform vec3  uFeature;
+  uniform vec3  uFeature2;
+  uniform float uGradient;
+  uniform float uLocalYMin;
+  uniform float uLocalYMax;
+  uniform vec2  uAxisXZ;
+  uniform float uRawBoreR;
+  uniform float uFeatTh;
+  varying vec3 vWorldNormal;
+  varying vec3 vLocalNormal;
+  varying vec3 vWorldPos;
+  varying vec3 vLocalPos;
+  varying vec3 vViewPos;
+  void main() {
+    vec2  lxz   = vec2(vLocalPos.x - uAxisXZ.x, vLocalPos.z - uAxisXZ.y);
+    float lr    = length(lxz);
+    vec3  lrad  = lr > 0.001 ? vec3(lxz.x/lr, 0.0, lxz.y/lr) : vec3(1.0,0.0,0.0);
+    vec3  LN    = normalize(vLocalNormal);
+    float rdot  = dot(LN, lrad);
+    float vabs  = abs(LN.y);
+    bool isBore    = lr < uRawBoreR;
+    bool isEndCap  = vabs > 0.75;
+    bool isFeature = !isBore && !isEndCap && rdot < uFeatTh;
+    vec3 featColor = uFeature;
+    if (uGradient > 0.5) {
+      float span = uLocalYMax - uLocalYMin;
+      float t = span > 0.001 ? clamp((vLocalPos.y - uLocalYMin) / span, 0.0, 1.0) : 0.0;
+      featColor = mix(uFeature, uFeature2, t);
+    }
+    vec3 base = isFeature ? featColor : uSurface;
+    vec3 N  = normalize(vWorldNormal);
+    vec3 V  = normalize(vViewPos);
+    vec3 L1 = normalize(vec3(3.0, 5.0, 3.0));
+    float d1 = max(dot(N,L1),0.0);
+    float s1 = pow(max(dot(N,normalize(L1+V)),0.0),64.0);
+    vec3 L2  = normalize(vec3(-3.0, 2.0,-2.0));
+    float d2 = max(dot(N,L2),0.0);
+    vec3 L3  = normalize(vec3(0.0,-2.0,-4.0));
+    float d3 = max(dot(N,L3),0.0);
+    vec3 col = 0.20*base + 0.68*d1*base + 0.45*s1*vec3(1.0)
+             + 0.18*d2*base + 0.14*d3*vec3(1.0);
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+const MODEL_FEAT_TH = { pyramid: 0.92, dimple: 0.97 };
+
+function makeMat(rawCX, rawCZ, rawBoreR, featTh, rawYMin, rawYMax) {
+  return new THREE.ShaderMaterial({
+    vertexShader: VERT, fragmentShader: FRAG,
+    uniforms: {
+      uSurface:   { value: new THREE.Color(S.surface)  },
+      uFeature:   { value: new THREE.Color(S.feature)  },
+      uFeature2:  { value: new THREE.Color(S.feature2) },
+      uGradient:  { value: S.gradient ? 1.0 : 0.0 },
+      uLocalYMin: { value: rawYMin },
+      uLocalYMax: { value: rawYMax },
+      uAxisXZ:    { value: new THREE.Vector2(rawCX, rawCZ) },
+      uRawBoreR:  { value: rawBoreR },
+      uFeatTh:    { value: featTh },
+    },
+    side: THREE.DoubleSide,
+  });
+}
+
+function computeBoreR(obj, rawCX, rawCZ) {
+  const radii = [];
+  obj.traverse(c => {
+    if (!c.isMesh) return;
+    const pos = c.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const dx = pos.getX(i) - rawCX, dz = pos.getZ(i) - rawCZ;
+      radii.push(Math.sqrt(dx*dx + dz*dz));
+    }
+  });
+  radii.sort((a,b) => a-b);
+  let maxGap = 0, gapMid = radii[0];
+  for (let i = 0; i < radii.length-1; i++) {
+    const gap = radii[i+1]-radii[i];
+    if (gap > maxGap) { maxGap = gap; gapMid = (radii[i]+radii[i+1])/2; }
+  }
+  return gapMid;
+}
+
+function computeMaxWorldR(obj, rawCX, rawCZ, scale) {
+  let maxR = 0;
+  obj.traverse(c => {
+    if (!c.isMesh) return;
+    const pos = c.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const dx = pos.getX(i) - rawCX, dz = pos.getZ(i) - rawCZ;
+      maxR = Math.max(maxR, Math.sqrt(dx*dx + dz*dz));
+    }
+  });
+  return maxR * scale;
+}
+
+// ═══════════════════════════════════════════════════════
+// MODEL LOADING
+// ═══════════════════════════════════════════════════════
+function clearGroup() {
+  while (group.children.length) {
+    const c = group.children[0];
+    c.geometry?.dispose(); c.material?.dispose(); group.remove(c);
+  }
+}
+
+function setLoading(on, sub) {
+  const el = document.getElementById('kyro-vp-load');
+  el.style.opacity = on ? '1' : '0';
+  el.style.pointerEvents = on ? 'all' : 'none';
+  if (sub) document.getElementById('kyro-vp-load-sub').textContent = sub;
+}
+
+function applyObj(obj) {
+  const rawBox = new THREE.Box3().setFromObject(obj);
+  const rawSize = new THREE.Vector3(); rawBox.getSize(rawSize);
+  const rawCenter = new THREE.Vector3(); rawBox.getCenter(rawCenter);
+  const rawBoreR = computeBoreR(obj, rawCenter.x, rawCenter.z);
+  const scale    = 2.0 / Math.max(rawSize.x, rawSize.y, rawSize.z);
+  const featTh   = MODEL_FEAT_TH[S.shape] ?? 0.95;
+  obj.scale.setScalar(scale);
+  const scaledCenter = rawCenter.clone().multiplyScalar(scale);
+  obj.position.sub(scaledCenter);
+  obj.traverse(c => {
+    if (!c.isMesh) return;
+    if (!c.geometry.attributes.normal) c.geometry.computeVertexNormals();
+    c.material = makeMat(rawCenter.x, rawCenter.z, rawBoreR, featTh, rawBox.min.y, rawBox.max.y);
+    c.castShadow = true; c.receiveShadow = true;
+  });
+  clearGroup();
+  group.add(obj);
+  const worldMaxR    = computeMaxWorldR(obj, rawCenter.x, rawCenter.z, scale);
+  const worldTopY    = (rawBox.max.y * scale) - scaledCenter.y;
+  const worldBottomY = (rawBox.min.y * scale) - scaledCenter.y;
+  _capInfo = { worldTopY, worldBottomY, worldMaxR };
+  rebuildInitials();
+  setLoading(false);
+}
+
+function loadShape(shape) {
+  setLoading(true, KYRO_MODELS[shape].split('/').pop().split('?')[0]);
+  document.getElementById('kyro-vp-status').textContent = `Kyro Feral — ${shape === 'pyramid' ? 'Pyramid' : 'Dimple'}`;
+  if (cache[shape]) { applyObj(cache[shape].clone()); return; }
+  new THREE.OBJLoader().load(
+    KYRO_MODELS[shape],
+    obj => { cache[shape] = obj.clone(); applyObj(obj); },
+    xhr => {
+      if (xhr.total) document.getElementById('kyro-vp-load-sub').textContent =
+        `${Math.round(xhr.loaded/xhr.total*100)}%`;
+    },
+    err => { console.error(err); setLoading(false); }
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// COLORS
+// ═══════════════════════════════════════════════════════
+function updateColors() {
+  group.traverse(c => {
+    if (!c.isMesh || !c.material?.uniforms) return;
+    c.material.uniforms.uSurface.value.set(S.surface);
+    c.material.uniforms.uFeature.value.set(S.feature);
+    c.material.uniforms.uFeature2.value.set(S.feature2);
+    c.material.uniforms.uGradient.value = S.gradient ? 1.0 : 0.0;
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// INITIALS
+// ═══════════════════════════════════════════════════════
+let initialsDisk = null;
+let _capInfo = null;
+
+function rebuildInitials() {
+  if (initialsDisk) {
+    group.remove(initialsDisk);
+    initialsDisk.geometry.dispose();
+    initialsDisk.material.map?.dispose();
+    initialsDisk.material.dispose();
+    initialsDisk = null;
+  }
+  if (!S.initials.trim() || !_capInfo) return;
+  const text = S.initials.trim().toUpperCase().slice(0,3);
+  const W = 1024, H = 256;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 12;
+  ctx.fillStyle = S.initColor;
+  let sz = 180;
+  ctx.font = FONT_CSS[S.font](sz);
+  const measured = ctx.measureText(text).width;
+  if (measured > 0) sz = Math.min(sz, sz * (W * 0.85) / measured);
+  ctx.font = FONT_CSS[S.font](Math.floor(sz));
+  ctx.fillText(text, W/2, H/2);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.encoding = THREE.sRGBEncoding;
+  const totalH     = _capInfo.worldTopY - _capInfo.worldBottomY;
+  const cylH       = totalH * 0.20;
+  const cylCenterY = _capInfo.worldBottomY + totalH * 0.84;
+  const cylR       = _capInfo.worldMaxR * 0.99;
+  const geo = new THREE.CylinderGeometry(cylR, cylR, cylH, 64, 1, true);
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, transparent: true, depthWrite: false, depthTest: false, side: THREE.FrontSide,
+  });
+  initialsDisk = new THREE.Mesh(geo, mat);
+  initialsDisk.rotation.y = Math.PI;
+  initialsDisk.position.y = cylCenterY;
+  group.add(initialsDisk);
+}
+
+// ═══════════════════════════════════════════════════════
+// UI
+// ═══════════════════════════════════════════════════════
+function buildPresets() {
+  [['kyro-surf-presets', true], ['kyro-feat-presets', false]].forEach(([id, isSurf]) => {
+    const row = document.getElementById(id);
+    PRESETS.forEach((hex, i) => {
+      const el = document.createElement('div');
+      el.className = 'kyro-pw' + ((isSurf && i===0)||(!isSurf && i===1)?' on':'');
+      el.style.background = hex;
+      el.onclick = () => {
+        row.querySelectorAll('.kyro-pw').forEach(p=>p.classList.remove('on'));
+        el.classList.add('on');
+        if (isSurf) kyroSetSurface(hex); else kyroSetFeature(hex);
+      };
+      row.appendChild(el);
+    });
+  });
+}
+
+function kyroSetShape(s, btn) {
+  document.querySelectorAll('.kyro-sbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); S.shape = s; loadShape(s);
+}
+function kyroSetSurface(hex) {
+  S.surface = hex;
+  document.getElementById('kyro-surf-swatch').style.background = hex;
+  document.getElementById('kyro-surf-picker').value = hex;
+  updateColors();
+}
+function kyroSetFeature(hex) {
+  S.feature = hex;
+  document.getElementById('kyro-feat-swatch').style.background = hex;
+  document.getElementById('kyro-feat-picker').value = hex;
+  updateColors();
+}
+function kyroSetFeature2(hex) {
+  S.feature2 = hex;
+  document.getElementById('kyro-feat2-swatch').style.background = hex;
+  document.getElementById('kyro-feat2-picker').value = hex;
+  updateColors();
+}
+function kyroToggleGradient(el) {
+  el.classList.toggle('on');
+  S.gradient = el.classList.contains('on');
+  document.getElementById('kyro-grad-row').style.display = S.gradient ? '' : 'none';
+  updateColors();
+}
+function kyroSetInitColor(hex) {
+  S.initColor = hex;
+  document.getElementById('kyro-ic-swatch').style.background = hex;
+  document.getElementById('kyro-ic-picker').value = hex;
+  rebuildInitials();
+}
+let _kyroIt;
+function kyroQueueInit(v) {
+  clearTimeout(_kyroIt);
+  _kyroIt = setTimeout(() => { S.initials = v; rebuildInitials(); }, 350);
+}
+function kyroSetFont(v) { S.font = v; rebuildInitials(); }
+function kyroToggleRot(el) {
+  el.classList.toggle('on');
+  S.autoRot = el.classList.contains('on');
+  controls.autoRotate = S.autoRot;
+}
+function kyroReset() {
+  S.surface='#f0f0f0'; S.feature='#1c1c1c'; S.feature2='#c8a84b';
+  S.gradient=false; S.initColor='#c8a84b'; S.initials=''; S.font='sans'; S.autoRot=true;
+  kyroSetSurface('#f0f0f0'); kyroSetFeature('#1c1c1c'); kyroSetFeature2('#c8a84b');
+  document.getElementById('kyro-gtog').classList.remove('on');
+  document.getElementById('kyro-grad-row').style.display = 'none';
+  document.getElementById('kyro-ic-swatch').style.background='#c8a84b';
+  document.getElementById('kyro-ic-picker').value='#c8a84b';
+  document.getElementById('kyro-ii').value='';
+  document.getElementById('kyro-fnt').value='sans';
+  document.getElementById('kyro-rtog').classList.add('on');
+  controls.autoRotate=true;
+  document.querySelectorAll('.kyro-sbtn').forEach((b,i)=>b.classList.toggle('on',i===0));
+  S.shape='pyramid'; loadShape('pyramid');
+}
+function kyroSave() {
+  renderer.render(scene, camera);
+  const a = document.createElement('a');
+  a.href = renderer.domElement.toDataURL('image/png');
+  a.download = `kyro-feral-${S.shape}-${Date.now()}.png`;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════
+// RESIZE + LOOP
+// ═══════════════════════════════════════════════════════
+function onResize() {
+  const w = vpEl.clientWidth, h = vpEl.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+onResize();
+(function loop(){ requestAnimationFrame(loop); controls.update(); renderer.render(scene,camera); })();
+
+buildPresets();
+loadShape('pyramid');
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Ferrule Configurator",
+  "tag": "section",
+  "class": "kyro-config-section",
+  "settings": [],
+  "presets": [{ "name": "Ferrule Configurator" }]
+}
+{% endschema %}
