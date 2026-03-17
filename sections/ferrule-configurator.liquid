@@ -7,8 +7,11 @@
 
   /* Section takes full viewport height, overrides theme padding */
   .shopify-section:has(#kyro-cfg-wrap) { padding: 0 !important; }
+  .page-width:has(#kyro-cfg-wrap),
+  .container:has(#kyro-cfg-wrap) { max-width: 100% !important; padding: 0 !important; }
 
   #kyro-cfg-wrap {
+    padding-left: 16px;
     --bg:    #0f1a16;
     --panel: #1c302b;
     --bdr:   #2e5048;
@@ -676,12 +679,42 @@ function kyroReset() {
   document.querySelectorAll('.kyro-sbtn').forEach((b,i)=>b.classList.toggle('on',i===0));
   S.shape='pyramid'; loadShape('pyramid');
 }
-function kyroSave() {
+async function kyroSave() {
+  // 1. Download screenshot
   renderer.render(scene, camera);
   const a = document.createElement('a');
   a.href = renderer.domElement.toDataURL('image/png');
   a.download = `kyro-feral-${S.shape}-${Date.now()}.png`;
   a.click();
+
+  // 2. Add to cart with configuration as line item properties
+  try {
+    const res = await fetch('/products/kyro-feral-performance-ferrule.js');
+    if (!res.ok) throw new Error('Product not yet live');
+    const product = await res.json();
+    const variantId = product.variants[0].id;
+    await fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [{
+          id: variantId,
+          quantity: 1,
+          properties: {
+            'Model':          S.shape === 'pyramid' ? 'Pyramid' : 'Dimple',
+            'Surface Color':  S.surface,
+            'Feature Color':  S.feature,
+            'Gradient':       S.gradient ? `${S.feature} → ${S.feature2}` : 'Off',
+            'Initials':       S.initials || '—',
+          }
+        }]
+      })
+    });
+    window.location.href = '/cart';
+  } catch (e) {
+    // Product not live yet — open product page in new tab
+    window.open('/products/kyro-feral-performance-ferrule', '_blank');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -699,6 +732,13 @@ onResize();
 
 buildPresets();
 loadShape('pyramid');
+
+// Expose handlers — required because onclick attrs can't reach inside IIFE
+Object.assign(window, {
+  kyroSetShape, kyroSetSurface, kyroSetFeature, kyroSetFeature2,
+  kyroToggleGradient, kyroSetInitColor, kyroQueueInit, kyroSetFont,
+  kyroToggleRot, kyroReset, kyroSave,
+});
 })();
 </script>
 
