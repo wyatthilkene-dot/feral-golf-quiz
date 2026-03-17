@@ -45,8 +45,8 @@
   .kyro-pt { font-size:1.15rem; font-weight:700; font-style:italic; }
   .kyro-ps { font-size:.72rem; color:var(--mut); margin-top:3px; }
 
-  .kyro-sec { padding:22px 20px; border-bottom:1px solid var(--bdr); }
-  .kyro-sl  { font-size:.6rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--mut); margin-bottom:12px; }
+  .kyro-sec { padding:28px 20px; border-bottom:1px solid var(--bdr); }
+  .kyro-sl  { font-size:.6rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--mut); margin-bottom:16px; }
 
   .kyro-shape-row { display:flex; gap:8px; }
   .kyro-sbtn {
@@ -59,7 +59,7 @@
   .kyro-sbtn.on { border-color:var(--acc); background:rgba(161,217,198,.1); color:var(--acc); }
   .kyro-sbtn .si { font-size:1.4rem; display:block; margin-bottom:4px; }
 
-  .kyro-cpick-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .kyro-cpick-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
   .kyro-cpick-label { font-size:.8rem; font-weight:600; color:var(--txt); flex:1; }
   .kyro-cpick-wrap {
     position:relative; width:48px; height:36px;
@@ -291,6 +291,8 @@
 
 <script>
 (function () {
+const IMGBB_KEY = {{ section.settings.imgbb_api_key | default: '' | json }};
+
 // ═══════════════════════════════════════════════════════
 // CONSTANTS — model URLs from Shopify theme assets CDN
 // ═══════════════════════════════════════════════════════
@@ -701,15 +703,28 @@ function kyroReset() {
   document.querySelectorAll('.kyro-sbtn').forEach((b,i)=>b.classList.toggle('on',i===0));
   S.shape='pyramid'; loadShape('pyramid');
 }
-function kyroSave() {
-  // 1. Download screenshot
-  renderer.render(scene, camera);
-  const a = document.createElement('a');
-  a.href = renderer.domElement.toDataURL('image/png');
-  a.download = `kyro-feral-${S.shape}-${Date.now()}.png`;
-  a.click();
+async function kyroSave() {
+  const btn = document.querySelector('.kyro-bs');
+  btn.disabled = true;
+  btn.textContent = 'Adding…';
 
-  // 2. Submit form to /cart/add — most reliable Shopify add-to-cart method
+  // Capture screenshot
+  renderer.render(scene, camera);
+  const dataUrl = renderer.domElement.toDataURL('image/png');
+
+  // Upload to imgbb
+  let previewUrl = '';
+  if (IMGBB_KEY) {
+    try {
+      const fd = new FormData();
+      fd.append('image', dataUrl.split(',')[1]);
+      const res = await fetch('https://api.imgbb.com/1/upload?key=' + IMGBB_KEY, { method: 'POST', body: fd });
+      const json = await res.json();
+      if (json.success) previewUrl = json.data.url;
+    } catch (e) { /* proceed without image */ }
+  }
+
+  // Build and submit cart form
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = '/cart/add';
@@ -720,13 +735,14 @@ function kyroSave() {
     form.appendChild(i);
   };
 
-  field('id',                         String(KYRO_VARIANTS[S.shape][S.qty]));
-  field('quantity',                   '1');
-  field('properties[Model]',          S.shape === 'pyramid' ? 'Pyramid Inverted' : 'Dimpled (Concave)');
-  field('properties[Surface Color]',  S.surface);
-  field('properties[Feature Color]',  S.feature);
-  field('properties[Gradient]',       S.gradient ? 'Yes - ' + S.feature + ' to ' + S.feature2 : 'No');
-  field('properties[Initials]',       S.initials || 'None');
+  field('id',                        String(KYRO_VARIANTS[S.shape][S.qty]));
+  field('quantity',                  '1');
+  field('properties[Model]',         S.shape === 'pyramid' ? 'Pyramid Inverted' : 'Dimpled (Concave)');
+  field('properties[Surface Color]', S.surface);
+  field('properties[Feature Color]', S.feature);
+  field('properties[Gradient]',      S.gradient ? 'Yes - ' + S.feature + ' to ' + S.feature2 : 'No');
+  field('properties[Initials]',      S.initials || 'None');
+  if (previewUrl) field('properties[Preview]', previewUrl);
 
   document.body.appendChild(form);
   form.submit();
@@ -762,7 +778,14 @@ Object.assign(window, {
   "name": "Ferrule Configurator",
   "tag": "section",
   "class": "kyro-config-section",
-  "settings": [],
+  "settings": [
+    {
+      "type": "text",
+      "id": "imgbb_api_key",
+      "label": "imgbb API Key",
+      "info": "Free at imgbb.com — used to attach a screenshot of the configured ferrule to each order."
+    }
+  ],
   "presets": [{ "name": "Ferrule Configurator" }]
 }
 {% endschema %}
