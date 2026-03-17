@@ -689,10 +689,7 @@ async function kyroSave() {
 
   // 2. Add to cart with configuration as line item properties
   try {
-    const res = await fetch('/products/kyro-performance-ferrule.js');
-    if (!res.ok) throw new Error('Product not yet live');
-    const product = await res.json();
-    const variantId = product.variants[0].id;
+    const variantId = 4717521466181;
     await fetch('/cart/add.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
