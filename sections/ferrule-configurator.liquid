@@ -299,9 +299,9 @@ const KYRO_MODELS = {
   dimple:  {{ 'ferrule-dotted.obj' | asset_url | json }},
 };
 
-// Variant IDs: shape × qty  (fetched from /products/kyro-performance-ferrule.js)
+// Variant IDs: shape × qty  (from /products/kyro-performance-ferrule.json)
 const KYRO_VARIANTS = {
-  pyramid: { 3: 47175228227767, 5: 47175228326071, 10: 47175228424375 }, // Pyramid Extruded
+  pyramid: { 3: 47175214661815, 5: 47175214694583, 10: 47175214727351 }, // Pyramid Inverted
   dimple:  { 3: 47175228260535, 5: 47175228358839, 10: 47175228457143 }, // Dimpled (Concave)
 };
 
@@ -722,11 +722,11 @@ function kyroSave() {
 
   field('id',                         String(KYRO_VARIANTS[S.shape][S.qty]));
   field('quantity',                   '1');
-  field('properties[Model]',          S.shape === 'pyramid' ? 'Pyramid' : 'Dimple');
+  field('properties[Model]',          S.shape === 'pyramid' ? 'Pyramid Inverted' : 'Dimpled (Concave)');
   field('properties[Surface Color]',  S.surface);
   field('properties[Feature Color]',  S.feature);
-  field('properties[Gradient]',       S.gradient ? `${S.feature} → ${S.feature2}` : 'Off');
-  field('properties[Initials]',       S.initials || '—');
+  field('properties[Gradient]',       S.gradient ? 'Yes - ' + S.feature + ' to ' + S.feature2 : 'No');
+  field('properties[Initials]',       S.initials || 'None');
 
   document.body.appendChild(form);
   form.submit();
