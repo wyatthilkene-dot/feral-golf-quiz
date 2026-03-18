@@ -162,6 +162,35 @@
     animation:kyro-spin .8s linear infinite; margin-bottom:14px;
   }
   @keyframes kyro-spin { to { transform:rotate(360deg); } }
+
+  /* ── MOBILE ── */
+  @media (max-width: 640px) {
+    #kyro-cfg-wrap {
+      flex-direction: column;
+      height: auto;
+      overflow: visible;
+      padding-left: 0;
+    }
+    #kyro-vp {
+      order: -1;
+      height: 45vh;
+      min-height: 260px;
+      flex: none;
+    }
+    #kyro-panel {
+      width: 100%;
+      min-width: 0;
+      border-right: none;
+      border-top: 1px solid var(--bdr);
+      overflow-y: visible;
+    }
+    .kyro-ar {
+      position: sticky;
+      bottom: 0;
+      background: var(--panel);
+      z-index: 10;
+    }
+  }
 </style>
 
 <div id="kyro-cfg-wrap">
