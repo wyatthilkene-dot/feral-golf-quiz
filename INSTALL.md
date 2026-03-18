@@ -44,6 +44,36 @@ models/ferrule-dotted.obj                 ← Dimple model (upload as theme asse
 3. In the **Theme template** dropdown, select **page.ferrule-configurator**
 4. Click **Save**
 
+## Step 5 — Enable Cart Preview Image
+
+When a customer adds to cart, the configurator uploads a screenshot of their configuration to imgbb and attaches it as a `Preview` line item property. To render it as an actual image in the cart (instead of a URL), update the cart snippet:
+
+1. In the code editor, open **Snippets → cart-products.liquid**
+2. Find the block that renders line item properties — look for `{%- for property in item.properties -%}`
+3. Inside the `<dd>` tag, replace the existing if/else with:
+
+```liquid
+{%- if property.first == 'Preview' and property.last contains 'ibb.co' -%}
+  <img src="{{ property.last }}" alt="Your configuration" style="display:block;max-width:120px;border-radius:6px;margin-top:6px;">
+{%- elsif property.last contains '/uploads/' -%}
+  <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
+{%- else -%}
+  {{ property.last }}
+{%- endif -%}
+```
+
+4. Click **Save**
+
+## Step 6 — Add imgbb API Key
+
+1. Sign up free at [imgbb.com](https://imgbb.com) → API → copy your key
+2. Go to **Online Store → Themes → Customize**
+3. Navigate to the Ferrule Configurator page
+4. Click the **Ferrule Configurator** section in the left sidebar
+5. Paste your key into the **imgbb API Key** field → Save
+
+> Without the key, Add to Cart still works — it just won't attach a preview image.
+
 ## Troubleshooting — Configurator
 
 | Issue | Fix |
@@ -51,6 +81,7 @@ models/ferrule-dotted.obj                 ← Dimple model (upload as theme asse
 | Models not loading | Confirm `ferrule.obj` / `ferrule-dotted.obj` exist under Assets with exact names |
 | Blank page / JS error | Check browser console; likely a CDN block on Three.js — add CDN to CSP if needed |
 | Configurator fills wrong height | Some themes add padding to sections; add `padding: 0` override to `.kyro-config-section` in theme CSS |
+| Preview image not showing in cart | Confirm `snippets/cart-products.liquid` was updated (Step 5) and imgbb API key is set (Step 6) |
 
 ---
 
