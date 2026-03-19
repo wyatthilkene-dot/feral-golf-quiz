@@ -537,9 +537,9 @@ const PYF_QUESTIONS = [
 const PYF_FERRULES = [
   {
     name: "Kyro Feral",
-    handle: "kyro-feral-performance-ferrule",
+    handle: "kyro-performance-ferrule",
     tagline: "Pure performance. Built for the grind, not the gallery.",
-    comingSoon: true,
+    configurator: true,
     tags: {earth:0, cool:2, bold:1, neutral:2, outdoorsy:0, creative:0, wild:0, minimal:3, statement:0, personal:0, clean:3}
   },
   {
@@ -817,9 +817,11 @@ async function pyfBuildCard(ferrule, isTopPick) {
 
   const priceHtml = price ? `$${price}` : '';
 
-  const cartBtn = variantId
-    ? `<button class="pyf-btn-cart" id="cart-btn-${variantId}" onclick="pyfAddToCart(${variantId}, this)">+ Add to Cart</button>`
-    : '';
+  const cartBtn = ferrule.configurator
+    ? `<a class="pyf-btn-cart" href="/pages/feral-design-studio">Customize It &rarr;</a>`
+    : variantId
+      ? `<button class="pyf-btn-cart" id="cart-btn-${variantId}" onclick="pyfAddToCart(${variantId}, this)">+ Add to Cart</button>`
+      : '';
 
   return `
     <div class="pyf-product-card${isTopPick ? ' top-pick' : ''}" style="position:relative">
