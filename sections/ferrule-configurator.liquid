@@ -1,4 +1,4 @@
-<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
+{% comment %}Rubik already loaded by Drive theme globally — no duplicate font request needed{% endcomment %}
 
 <style>
   #kyro-cfg-wrap *,
@@ -25,13 +25,14 @@
     background: var(--bg);
     color: var(--txt);
     height: 100vh;
+    height: 100dvh;
     display: flex;
     overflow: hidden;
   }
 
   /* ── PANEL ── */
   #kyro-panel {
-    width:280px; min-width:280px;
+    width:310px; min-width:310px;
     background:var(--panel);
     border-right:1px solid var(--bdr);
     display:flex; flex-direction:column;
@@ -40,60 +41,85 @@
   #kyro-panel::-webkit-scrollbar { width:3px; }
   #kyro-panel::-webkit-scrollbar-thumb { background:var(--bdr); }
 
-  #kyro-ph { padding:22px 20px 16px; border-bottom:1px solid var(--bdr); flex-shrink:0; }
-  .kyro-ey { font-size:.6rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--acc); margin-bottom:4px; }
+  #kyro-ph { padding:14px 20px 12px !important; border-bottom:1px solid var(--bdr); flex-shrink:0; }
+  .kyro-ey { font-size:.6rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--acc); margin-bottom:6px; }
   .kyro-pt { font-size:1.15rem; font-weight:700; font-style:italic; }
-  .kyro-ps { font-size:.72rem; color:var(--mut); margin-top:3px; }
+  .kyro-ps { font-size:.72rem; color:var(--mut); margin-top:6px; }
 
-  .kyro-sec { padding:28px 20px; border-bottom:1px solid var(--bdr); }
-  .kyro-sl  { font-size:.6rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--mut); margin-bottom:16px; }
+  /* !important on padding — overrides the #kyro-cfg-wrap * { padding:0 } reset (specificity 1,0,0 beats 0,1,0) */
+  /* gap on flex columns for internal spacing — gap is not a margin/padding so the reset doesn't touch it */
+  .kyro-sec {
+    padding: 12px 20px !important;
+    border-bottom: 1px solid var(--bdr);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .kyro-sl  { font-size:.6rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--mut); }
 
-  .kyro-shape-row { display:flex; gap:8px; }
+  .kyro-shape-row { display:flex; gap:10px; }
   .kyro-sbtn {
-    flex:1; padding:14px 8px 12px;
+    flex:1; padding:16px 8px 14px !important;
     background:transparent; border:1.5px solid var(--bdr); border-radius:var(--r);
     color:var(--txt); font-family:var(--font); font-size:.8rem; font-weight:600;
     cursor:pointer; text-align:center; transition:border-color .2s, background .2s, color .2s;
   }
   .kyro-sbtn:hover { border-color:var(--acc); }
   .kyro-sbtn.on { border-color:var(--acc); background:rgba(161,217,198,.1); color:var(--acc); }
-  .kyro-sbtn .si { font-size:1.4rem; display:block; margin-bottom:4px; }
+  .kyro-sbtn .si { font-size:1.4rem; display:block; }
 
-  .kyro-cpick-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .kyro-cpick-row { display:flex; align-items:center; gap:16px; }
   .kyro-cpick-label { font-size:.8rem; font-weight:600; color:var(--txt); flex:1; }
   .kyro-cpick-wrap {
-    position:relative; width:48px; height:36px;
-    border-radius:8px; overflow:hidden; cursor:pointer;
-    border:2px solid var(--bdr); transition:border-color .2s;
+    position:relative; width:80px; height:50px;
+    border-radius:10px; overflow:hidden; cursor:pointer;
+    border:2px solid var(--bdr); transition:border-color .2s, box-shadow .2s;
     flex-shrink:0;
   }
-  .kyro-cpick-wrap:hover { border-color:var(--acc); }
+  .kyro-cpick-wrap:hover { border-color:var(--acc); box-shadow:0 0 0 3px rgba(161,217,198,.18); }
   .kyro-cpick-wrap input[type="color"] {
     position:absolute; inset:-8px; width:calc(100% + 16px); height:calc(100% + 16px);
     opacity:0; cursor:pointer; border:none; padding:0;
   }
   .kyro-cpick-swatch { position:absolute; inset:0; pointer-events:none; }
 
-  .kyro-preset-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+  .kyro-cpick-label { font-size:.78rem; font-weight:600; color:var(--txt); flex:1; }
+  .kyro-cpick-sublabel { font-size:.62rem; color:var(--mut); margin-top:2px; }
+
+  .kyro-preset-row { display:flex; flex-wrap:wrap; gap:8px; }
   .kyro-pw {
-    width:24px; height:24px; border-radius:50%; cursor:pointer;
+    width:26px; height:26px; border-radius:50%; cursor:pointer;
     border:2px solid transparent; transition:transform .15s, border-color .15s; flex-shrink:0;
+    position:relative;
   }
   .kyro-pw:hover { transform:scale(1.2); }
   .kyro-pw.on { border-color:#fff; }
+  .kyro-pw-tip {
+    display:none; position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+    background:#0f1a16; border:1px solid var(--bdr); color:var(--txt);
+    font-size:.58rem; font-weight:600; letter-spacing:.04em; white-space:nowrap;
+    padding:3px 7px; border-radius:4px; pointer-events:none; z-index:100;
+    font-family:var(--font);
+  }
+  .kyro-pw:hover .kyro-pw-tip { display:block; }
 
-  .kyro-init-row { display:flex; gap:9px; }
+  .kyro-cpick-hint {
+    font-size:.6rem; color:var(--mut);
+    display:flex; align-items:center; gap:5px;
+  }
+  .kyro-cpick-hint::before { content:'↑'; font-size:.7rem; color:var(--acc); }
+
+  .kyro-init-row { display:flex; gap:12px; }
   .kyro-ii {
-    width:64px; padding:9px 6px;
-    background:var(--bg); border:1.5px solid var(--bdr); border-radius:8px;
-    color:var(--txt); font-family:var(--font); font-size:1rem; font-weight:700;
+    width:64px; padding:9px 6px !important;
+    background:#1a2e28 !important; border:1.5px solid var(--bdr) !important; border-radius:8px;
+    color:#f1f3f3 !important; font-family:var(--font); font-size:1rem; font-weight:700;
     text-transform:uppercase; letter-spacing:.1em; text-align:center;
   }
-  .kyro-ii:focus { outline:none; border-color:var(--acc); }
+  .kyro-ii::placeholder { color:#7aab9a !important; }
+  .kyro-ii:focus { outline:none; border-color:var(--acc) !important; }
   .kyro-sel {
-    flex:1; padding:9px 28px 9px 10px;
-    background:var(--bg); border:1.5px solid var(--bdr); border-radius:8px;
-    color:var(--txt); font-family:var(--font); font-size:.8rem; cursor:pointer;
+    flex:1; padding:9px 28px 9px 10px !important;
+    background:#1a2e28 !important; border:1.5px solid var(--bdr) !important; border-radius:8px;
+    color:#f1f3f3 !important; font-family:var(--font); font-size:.8rem; cursor:pointer;
     appearance:none;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237aab9a'/%3E%3C/svg%3E");
     background-repeat:no-repeat; background-position:right 10px center;
@@ -115,7 +141,7 @@
   .kyro-tog.on::after { transform:translateX(16px); }
 
   .kyro-ar {
-    display:flex; gap:8px; padding:20px 20px;
+    display:flex; gap:10px; padding:12px 20px !important;
     flex-shrink:0; margin-top:auto; border-top:1px solid var(--bdr);
   }
   .kyro-br {
@@ -134,7 +160,7 @@
 
   /* ── VIEWPORT ── */
   #kyro-vp { flex:1; position:relative; overflow:hidden; }
-  #kyro-vp canvas { display:block; width:100%!important; height:100%!important; }
+  #kyro-vp canvas { display:block; width:100%!important; height:100%!important; touch-action:none; }
 
   #kyro-vp-hint {
     position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
@@ -178,7 +204,7 @@
       flex: none;
     }
     #kyro-panel {
-      width: 100%;
+      width: 100% !important;
       min-width: 0;
       border-right: none;
       border-top: 1px solid var(--bdr);
@@ -221,31 +247,39 @@
     <div class="kyro-sec">
       <div class="kyro-sl">Surface Color <span style="font-weight:400;color:var(--mut);text-transform:none;letter-spacing:0">(grid base body)</span></div>
       <div class="kyro-cpick-row">
-        <span class="kyro-cpick-label">Pick color</span>
+        <div>
+          <span class="kyro-cpick-label">Pick any color</span>
+          <div class="kyro-cpick-sublabel">All colors available</div>
+        </div>
         <div class="kyro-cpick-wrap">
           <div class="kyro-cpick-swatch" id="kyro-surf-swatch" style="background:#f0f0f0"></div>
           <input type="color" id="kyro-surf-picker" value="#f0f0f0" oninput="kyroSetSurface(this.value)">
         </div>
       </div>
       <div class="kyro-preset-row" id="kyro-surf-presets"></div>
+      <div class="kyro-cpick-hint">Click the swatch above to open the full color picker</div>
     </div>
 
     <!-- Feature color -->
     <div class="kyro-sec">
       <div class="kyro-sl">Feature Color <span style="font-weight:400;color:var(--mut);text-transform:none;letter-spacing:0">(pyramids / dots)</span></div>
       <div class="kyro-cpick-row">
-        <span class="kyro-cpick-label">Pick color</span>
+        <div>
+          <span class="kyro-cpick-label">Pick any color</span>
+          <div class="kyro-cpick-sublabel">All colors available</div>
+        </div>
         <div class="kyro-cpick-wrap">
           <div class="kyro-cpick-swatch" id="kyro-feat-swatch" style="background:#1c1c1c"></div>
           <input type="color" id="kyro-feat-picker" value="#1c1c1c" oninput="kyroSetFeature(this.value)">
         </div>
       </div>
       <div class="kyro-preset-row" id="kyro-feat-presets"></div>
-      <div class="kyro-trow" style="margin-top:10px">
+      <div class="kyro-cpick-hint">Click the swatch above to open the full color picker</div>
+      <div class="kyro-trow">
         <span class="kyro-tlbl">Gradient (blend 2 feature colors)</span>
         <div class="kyro-tog" id="kyro-gtog" onclick="kyroToggleGradient(this)"></div>
       </div>
-      <div id="kyro-grad-row" style="display:none;margin-top:10px">
+      <div id="kyro-grad-row" style="display:none">
         <div class="kyro-cpick-row">
           <span class="kyro-cpick-label">Feature color 2 <span style="font-size:.68rem;color:var(--mut)">(top)</span></span>
           <div class="kyro-cpick-wrap">
@@ -267,7 +301,7 @@
           <option value="script">Script</option>
         </select>
       </div>
-      <div class="kyro-cpick-row" style="margin-top:10px">
+      <div class="kyro-cpick-row">
         <span class="kyro-cpick-label">Initials color</span>
         <div class="kyro-cpick-wrap">
           <div class="kyro-cpick-swatch" id="kyro-ic-swatch" style="background:#c8a84b"></div>
@@ -302,7 +336,7 @@
 
   <!-- ═══ VIEWPORT ═══ -->
   <div id="kyro-vp">
-    <canvas id="kyro-c"></canvas>
+    <canvas id="kyro-c" role="img" aria-label="3D preview of Kyro Feral ferrule — drag to rotate, scroll to zoom"></canvas>
     <div id="kyro-vp-status">Kyro Feral — Pyramid</div>
     <div id="kyro-vp-hint">Drag to rotate · Scroll to zoom</div>
     <div id="kyro-vp-load">
@@ -337,9 +371,21 @@ const KYRO_VARIANTS = {
 };
 
 const PRESETS = [
-  '#f1f3f3','#1c1c1c','#c8a84b','#c0392b','#2d6a4f',
-  '#1e6091','#c8c8d8','#6c3483','#d35400','#a1d9c6',
-  '#4a5e3a','#e8e0c8','#8b4513','#2c3e50','#e91e8c',
+  { hex:'#ffffff', name:'White'        },
+  { hex:'#1c1c1c', name:'Black'        },
+  { hex:'#c8a84b', name:'Gold'         },
+  { hex:'#c0392b', name:'Red'          },
+  { hex:'#2d6a4f', name:'Forest Green' },
+  { hex:'#1e6091', name:'Navy Blue'    },
+  { hex:'#c8c8d8', name:'Silver'       },
+  { hex:'#6c3483', name:'Purple'       },
+  { hex:'#d35400', name:'Orange'       },
+  { hex:'#a1d9c6', name:'Mint'         },
+  { hex:'#4a5e3a', name:'Olive'        },
+  { hex:'#e8e0c8', name:'Cream'        },
+  { hex:'#8b4513', name:'Brown'        },
+  { hex:'#2c3e50', name:'Midnight'     },
+  { hex:'#e91e8c', name:'Pink'         },
 ];
 
 const FONT_CSS = {
@@ -371,7 +417,13 @@ const cache = {};
 // ═══════════════════════════════════════════════════════
 const canvas   = document.getElementById('kyro-c');
 const vpEl     = document.getElementById('kyro-vp');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, preserveDrawingBuffer:true });
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, preserveDrawingBuffer:true });
+} catch(e) {
+  vpEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px;padding:24px;text-align:center;color:#f1f3f3"><p style="font-size:1rem;font-weight:600">3D preview unavailable</p><p style="font-size:.85rem;opacity:.7">Your browser or device does not support WebGL.<br>Use the color swatches below to choose your ferrule colors, then add to cart.</p></div>';
+  return;
+}
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled   = true;
 renderer.outputEncoding      = THREE.sRGBEncoding;
@@ -472,8 +524,8 @@ const FRAG = `
     float d2 = max(dot(N,L2),0.0);
     vec3 L3  = normalize(vec3(0.0,-2.0,-4.0));
     float d3 = max(dot(N,L3),0.0);
-    vec3 col = 0.20*base + 0.68*d1*base + 0.45*s1*vec3(1.0)
-             + 0.18*d2*base + 0.14*d3*vec3(1.0);
+    vec3 col = 0.42*base + 0.62*d1*base + 0.40*s1*vec3(1.0)
+             + 0.22*d2*base + 0.12*d3*vec3(1.0);
     gl_FragColor = vec4(col, 1.0);
   }
 `;
@@ -639,7 +691,7 @@ function rebuildInitials() {
   const cylR       = _capInfo.worldMaxR * 0.99;
   const geo = new THREE.CylinderGeometry(cylR, cylR, cylH, 64, 1, true);
   const mat = new THREE.MeshBasicMaterial({
-    map: tex, transparent: true, depthWrite: false, depthTest: false, side: THREE.FrontSide,
+    map: tex, transparent: true, depthWrite: false, depthTest: true, side: THREE.FrontSide,
   });
   initialsDisk = new THREE.Mesh(geo, mat);
   initialsDisk.rotation.y = Math.PI;
@@ -653,10 +705,14 @@ function rebuildInitials() {
 function buildPresets() {
   [['kyro-surf-presets', true], ['kyro-feat-presets', false]].forEach(([id, isSurf]) => {
     const row = document.getElementById(id);
-    PRESETS.forEach((hex, i) => {
+    PRESETS.forEach(({hex, name}, i) => {
       const el = document.createElement('div');
       el.className = 'kyro-pw' + ((isSurf && i===0)||(!isSurf && i===1)?' on':'');
       el.style.background = hex;
+      const tip = document.createElement('span');
+      tip.className = 'kyro-pw-tip';
+      tip.textContent = name;
+      el.appendChild(tip);
       el.onclick = () => {
         row.querySelectorAll('.kyro-pw').forEach(p=>p.classList.remove('on'));
         el.classList.add('on');
@@ -788,7 +844,7 @@ function onResize() {
 }
 window.addEventListener('resize', onResize);
 onResize();
-(function loop(){ requestAnimationFrame(loop); controls.update(); renderer.render(scene,camera); })();
+(function loop(){ requestAnimationFrame(loop); if (!document.hidden) { controls.update(); renderer.render(scene,camera); } })();
 
 buildPresets();
 loadShape('pyramid');
