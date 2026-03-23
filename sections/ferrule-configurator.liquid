@@ -260,7 +260,7 @@
     <div class="kyro-sec">
       <div class="kyro-sl">Initials (optional)</div>
       <div class="kyro-init-row">
-        <input class="kyro-ii" id="kyro-ii" type="text" maxlength="3" placeholder="—" oninput="kyroQueueInit(this.value)">
+        <input class="kyro-ii" id="kyro-ii" type="text" maxlength="4" placeholder="—" oninput="kyroQueueInit(this.value)">
         <select class="kyro-sel" id="kyro-fnt" onchange="kyroSetFont(this.value)">
           <option value="sans">Sans-Serif</option>
           <option value="serif">Serif</option>
@@ -616,7 +616,7 @@ function rebuildInitials() {
     initialsDisk = null;
   }
   if (!S.initials.trim() || !_capInfo) return;
-  const text = S.initials.trim().toUpperCase().slice(0,3);
+  const text = S.initials.trim().toUpperCase().slice(0,4);
   const W = 1024, H = 256;
   const cv = document.createElement('canvas');
   cv.width = W; cv.height = H;
