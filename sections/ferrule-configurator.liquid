@@ -141,20 +141,20 @@
   .kyro-tog.on::after { transform:translateX(16px); }
 
   .kyro-ar {
-    display:flex; gap:10px; padding:12px 20px !important;
+    display:flex; flex-direction:column; gap:10px; padding:16px 20px !important;
     flex-shrink:0; margin-top:auto; border-top:1px solid var(--bdr);
   }
   .kyro-br {
-    flex:1; padding:11px; background:transparent;
+    padding:10px; background:transparent;
     border:1.5px solid var(--bdr); border-radius:8px;
-    color:var(--mut); font-family:var(--font); font-size:.8rem; font-weight:600;
+    color:var(--mut); font-family:var(--font); font-size:.75rem; font-weight:600;
     cursor:pointer; transition:border-color .2s, color .2s;
   }
   .kyro-br:hover { border-color:var(--acc); color:var(--acc); }
   .kyro-bs {
-    flex:1; padding:11px; background:var(--acc); border:none; border-radius:8px;
-    color:#0d1f1a; font-family:var(--font); font-size:.8rem; font-weight:700;
-    cursor:pointer; transition:opacity .15s;
+    width:100%; padding:18px; background:var(--acc); border:none; border-radius:10px;
+    color:#0d1f1a; font-family:var(--font); font-size:1rem; font-weight:800;
+    cursor:pointer; transition:opacity .15s; letter-spacing:.04em;
   }
   .kyro-bs:hover { opacity:.85; }
 
@@ -304,8 +304,8 @@
       <div class="kyro-cpick-row">
         <span class="kyro-cpick-label">Initials color</span>
         <div class="kyro-cpick-wrap">
-          <div class="kyro-cpick-swatch" id="kyro-ic-swatch" style="background:#c8a84b"></div>
-          <input type="color" id="kyro-ic-picker" value="#c8a84b" oninput="kyroSetInitColor(this.value)">
+          <div class="kyro-cpick-swatch" id="kyro-ic-swatch" style="background:#000000"></div>
+          <input type="color" id="kyro-ic-picker" value="#000000" oninput="kyroSetInitColor(this.value)">
         </div>
       </div>
     </div>
@@ -404,7 +404,7 @@ const S = {
   feature:  '#1c1c1c',
   feature2: '#c8a84b',
   gradient: false,
-  initColor:'#c8a84b',
+  initColor:'#000000',
   initials: '',
   font:     'sans',
   autoRot:  true,
@@ -775,12 +775,12 @@ function kyroToggleRot(el) {
 }
 function kyroReset() {
   S.surface='#f0f0f0'; S.feature='#1c1c1c'; S.feature2='#c8a84b';
-  S.gradient=false; S.initColor='#c8a84b'; S.initials=''; S.font='sans'; S.autoRot=true;
+  S.gradient=false; S.initColor='#000000'; S.initials=''; S.font='sans'; S.autoRot=true;
   kyroSetSurface('#f0f0f0'); kyroSetFeature('#1c1c1c'); kyroSetFeature2('#c8a84b');
   document.getElementById('kyro-gtog').classList.remove('on');
   document.getElementById('kyro-grad-row').style.display = 'none';
-  document.getElementById('kyro-ic-swatch').style.background='#c8a84b';
-  document.getElementById('kyro-ic-picker').value='#c8a84b';
+  document.getElementById('kyro-ic-swatch').style.background='#000000';
+  document.getElementById('kyro-ic-picker').value='#000000';
   document.getElementById('kyro-ii').value='';
   document.getElementById('kyro-fnt').value='sans';
   document.getElementById('kyro-rtog').classList.add('on');
